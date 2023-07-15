@@ -6,9 +6,11 @@ import random
 BALANCE = 200
 
 
-# SLOT MACHINE
+
 class SlotMachine(tk.Tk):
+    '''A class to represent a Slot Machine'''
     def __init__(self):
+        '''Constructs all the necessary attributes for slot_machine object'''
         super().__init__()
         
         # Set title and non-resizable root window
@@ -44,8 +46,9 @@ class SlotMachine(tk.Tk):
         slot_frm.grid(row=1, column=0, columnspan=3, padx=10)
 
 
-        # SLOT FOR A SYMBOL
+
         class Slot:
+            '''A class representing slot for a symbol'''
             def __init__(self, container):
                 self.canvas = tk.Canvas(container, relief='groove', borderwidth=2, width=150, height=150)
                 
@@ -76,8 +79,9 @@ class SlotMachine(tk.Tk):
         control_frame.grid(row=2, column=0, columnspan=3)
     
     
-    # CONTROL FRAME
+    
     class ControlFrame(ttk.Frame):
+        '''A class to represent controls of the slot machine'''
         def __init__(self):
             super().__init__()
             
@@ -121,8 +125,8 @@ class SlotMachine(tk.Tk):
             self.cashout_btn.grid(row=4, columnspan=3, pady=20) 
 
             
-        # Function that opens cashout menu window
         def cashout_menu(self):
+            '''Opens cashout menu window'''
             answer = messagebox.askyesno('CASH-OUT', f'${self.balance_var.get()} collected! Start a new game?')
             if answer:
                 self.balance_var.set(BALANCE)
@@ -131,21 +135,22 @@ class SlotMachine(tk.Tk):
                 self.quit()
             
                             
-        # Function that updates text value of bet (bet_lbl) widget based on a scale value and total
         def update_bet(self, *args):
+            '''Updates text value of bet (bet_lbl) widget based on a scale value and total'''
             self.bet_lbl.config(text=f'Bet: ${self.bet_var.get()}')
             self.total_var.set(self.bet_var.get()*self.payline_var.get())
             self.total_lbl.config(text=f'Total Bet: ${self.total_var.get()}')
             
             
-        # Update number of bet lines (paylines) and total
         def update_lines(self, *args):
+            '''Updates number of bet lines (paylines) and total'''
             self.paylines_lbl.config(text=f'Paylines: {self.payline_var.get()}')
             self.total_var.set(self.bet_var.get()*self.payline_var.get())
             self.total_lbl.config(text=f'Total Bet: ${self.total_var.get()}')
             
             
         def spin_reels(self, lines):
+            '''Takes number of payline and simulates spinning of reels'''
             symbols = [game.a, game.b, game.c, game.d, game.e]
             probability = [0.4, 0.4, 0.1, 0.05, 0.05]
             
@@ -181,14 +186,15 @@ class SlotMachine(tk.Tk):
                             self.update_balance(8)
         
         
-        # Function that updates balance       
         def update_balance(self, m):
+            '''Takes in multiplier and updates balance'''
             self.balance_var.set(self.balance_var.get() + self.total_var.get()*m)
             self.balance_lbl.config(text=f'Balance: ${self.balance_var.get()}')
         
 
-        # Spin
         def spin(self):
+            '''Spinning functionality'''
+            
             # Check for insufficient credits
             if self.balance_var.get() < self.total_var.get():
                 messagebox.showinfo('Insufficient Credits', 'Not enough credits!')
