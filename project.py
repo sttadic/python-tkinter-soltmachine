@@ -136,7 +136,35 @@ class SlotMachine(tk.Tk):
             self.paylines_lbl.config(text=f'Paylines: {self.payline_var.get()}')
             self.total_var.set(self.bet_var.get()*self.payline_var.get())
             self.total_lbl.config(text=f'Total Bet: ${self.total_var.get()}')
+            
+            
+        def spin_reels(self, lines):
+            symbols = [game.a, game.b, game.c, game.d, game.e]
+            probability = [0.4, 0.4, 0.1, 0.05, 0.05]
+            
+            # Randomly generate 3 lists using nested list comprehension
+            reels = [[random.choices(symbols, probability)[0] for _ in range(3)] for _ in range(3)]
+           
+            # Display randomly choosen symbol on the corresponding slot
+            game.slot_1x1.canvas.create_image(75, 75, image=reels[0][0])
+            game.slot_1x2.canvas.create_image(75, 75, image=reels[1][0])
+            game.slot_1x3.canvas.create_image(75, 75, image=reels[2][0])
+            game.slot_2x1.canvas.create_image(75, 75, image=reels[0][1])
+            game.slot_2x2.canvas.create_image(75, 75, image=reels[1][1])
+            game.slot_2x3.canvas.create_image(75, 75, image=reels[2][1])
+            game.slot_3x1.canvas.create_image(75, 75, image=reels[0][2])
+            game.slot_3x2.canvas.create_image(75, 75, image=reels[1][2])   
+            game.slot_3x3.canvas.create_image(75, 75, image=reels[2][2])
+            
+            # Compare symbols in appropriate positions by using all() function which returns true if all items in iterable are true
+            for line in range(lines):
+                if all(reels[i][line] == reels[j][line] for i, j in [(0, 1), (1, 2)]):
+                    print(f'LINE {line+1}')
+                    if reels[0][line] == game.a:
+                        self.balance_var.set(self.balance_var.get() + (self.total_var.get() * 2))
+                        self.balance_lbl.config(text=f'Balance: ${self.balance_var.get()}')
 
+        
 
         # Spin
         def spin(self):
@@ -148,6 +176,8 @@ class SlotMachine(tk.Tk):
             # Update balance
             self.balance_var.set(self.balance_var.get() - self.total_var.get())
             self.balance_lbl.config(text=f'Balance: ${self.balance_var.get()}')
+            
+            self.spin_reels(self.payline_var.get())
             
             # Check for game over
             if self.balance_var.get() == 0:
