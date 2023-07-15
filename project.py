@@ -17,13 +17,20 @@ class SlotMachine(tk.Tk):
         
         # Load image files
         self.bg = tk.PhotoImage(file = 'background.png')
-        # Symbol images
-        self.a = tk.PhotoImage(file='01.png')
-        self.b = tk.PhotoImage(file='02.png')
-        self.c = tk.PhotoImage(file='03.png')
-        self.d = tk.PhotoImage(file='04.png')
-        self.e = tk.PhotoImage(file='05.png')
-     
+        
+        # Load symbol images
+        try:
+            self.a = tk.PhotoImage(file='01.png')
+            self.b = tk.PhotoImage(file='02.png')
+            self.c = tk.PhotoImage(file='03.png')
+            self.d = tk.PhotoImage(file='04.png')
+            self.e = tk.PhotoImage(file='05.png')
+        except Exception as ex:
+            format_ = "Error Occured: {0}.\nArguments: {1!r}"
+            error_message = format_.format(type(ex).__name__, ex.args)
+            messagebox.showerror('ERROR', error_message)
+            return
+            
         # Set background of entire window
         bg_label = ttk.Label(self, image=self.bg)
         bg_label.place(x=0, y=0)
@@ -145,7 +152,7 @@ class SlotMachine(tk.Tk):
             # Randomly generate 3 lists using nested list comprehension
             reels = [[random.choices(symbols, probability)[0] for _ in range(3)] for _ in range(3)]
            
-            # Display randomly choosen symbol on the corresponding slot
+            # Display randomly choosen symbol on the corresponding slot of the reel
             game.slot_1x1.canvas.create_image(75, 75, image=reels[0][0])
             game.slot_1x2.canvas.create_image(75, 75, image=reels[1][0])
             game.slot_1x3.canvas.create_image(75, 75, image=reels[2][0])
@@ -153,17 +160,31 @@ class SlotMachine(tk.Tk):
             game.slot_2x2.canvas.create_image(75, 75, image=reels[1][1])
             game.slot_2x3.canvas.create_image(75, 75, image=reels[2][1])
             game.slot_3x1.canvas.create_image(75, 75, image=reels[0][2])
-            game.slot_3x2.canvas.create_image(75, 75, image=reels[1][2])   
+            game.slot_3x2.canvas.create_image(75, 75, image=reels[1][2])
             game.slot_3x3.canvas.create_image(75, 75, image=reels[2][2])
             
             # Compare symbols in appropriate positions by using all() function which returns true if all items in iterable are true
             for line in range(lines):
                 if all(reels[i][line] == reels[j][line] for i, j in [(0, 1), (1, 2)]):
                     print(f'LINE {line+1}')
-                    if reels[0][line] == game.a:
-                        self.balance_var.set(self.balance_var.get() + (self.total_var.get() * 2))
-                        self.balance_lbl.config(text=f'Balance: ${self.balance_var.get()}')
-
+                    # Winnings (multipliers per symbol)
+                    match reels[0][line]:
+                        case game.a:
+                            self.update_balance(2)
+                        case game.b:
+                            self.update_balance(3)
+                        case game.c:
+                            self.update_balance(4)
+                        case game.d:
+                            self.update_balance(6)
+                        case game.e:
+                            self.update_balance(8)
+        
+        
+        # Function that updates balance       
+        def update_balance(self, m):
+            self.balance_var.set(self.balance_var.get() + self.total_var.get()*m)
+            self.balance_lbl.config(text=f'Balance: ${self.balance_var.get()}')
         
 
         # Spin
@@ -173,10 +194,10 @@ class SlotMachine(tk.Tk):
                 messagebox.showinfo('Insufficient Credits', 'Not enough credits!')
                 return
             
-            # Update balance
-            self.balance_var.set(self.balance_var.get() - self.total_var.get())
-            self.balance_lbl.config(text=f'Balance: ${self.balance_var.get()}')
+            # Update balance (pass in -1 to substract amount of total bet from balance)
+            self.update_balance(-1)
             
+            # Spin the reels and check for winnings
             self.spin_reels(self.payline_var.get())
             
             # Check for game over
