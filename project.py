@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import random
+import time
 
 
 BALANCE = 200
@@ -38,8 +39,8 @@ class SlotMachine(tk.Tk):
         bg_label.place(x=0, y=0)
 
         # Message displaying information during the game
-        msg_lbl = ttk.Label(self, text='Welcome to Dino Hunt! Spin to start.', font=('Arial', 18), foreground='white', background='blue', width=35, anchor='center', relief='groove', borderwidth=10)
-        msg_lbl.grid(row=0, column=1, columnspan=3, pady=10)
+        self.msg_lbl = ttk.Label(self, text='Welcome to Dino Hunt! Spin to start.', font=('Arial', 18), foreground='white', background='blue', width=35, anchor='center', relief='groove', borderwidth=10)
+        self.msg_lbl.grid(row=0, column=1, columnspan=3, pady=10)
         
         # Paylines played (line indicator) widgets
         self.line1 = ttk.Label(self, text='Line 1', foreground='white', background='green', font=('', 18), relief='raised', borderwidth=5)
@@ -104,48 +105,58 @@ class SlotMachine(tk.Tk):
             # Initalize IntVar to store bet value and set its default value to 1, create bet label and amount-adjust slider for bet
             self.bet_var = tk.IntVar()
             self.bet_var.set(1)
-            self.bet_lbl = ttk.Label(self, text='Bet: $1', font=('', 16), justify='left')
-            self.bet_scl = ttk.Scale(self, from_=1, to=10, orient='horizontal', variable=self.bet_var, command=self.update_bet)
+            self.bet_lbl = tk.Label(self, text='Bet: $1', font=('', 16), relief='ridge', borderwidth=5, bg='black', fg='white', width=8)
+            self.bet_scl = tk.Scale(self, from_=1, to=10, orient='horizontal', variable=self.bet_var, bd=3, showvalue=0, troughcolor='black', bg='white', command=self.update_bet)
             
             # Paylines and amount-adjust slider for lines
             self.payline_var = tk.IntVar()
             self.payline_var.set(1)
-            self.paylines_lbl = ttk.Label(self, text='Paylines: 1', font=('', 16), justify='center')
-            self.paylines_scl = ttk.Scale(self, from_=1, to=3, orient='horizontal', variable=self.payline_var, command=self.update_lines)
+            self.paylines_lbl = tk.Label(self, text='Paylines: 1', font=('', 16), relief='ridge', borderwidth=5, bg='black', fg='white', width=9)
+            self.paylines_scl = tk.Scale(self, from_=1, to=3, orient='horizontal', variable=self.payline_var, bd=3, showvalue=0, troughcolor='black', bg='white', command=self.update_lines)
 
             # Total bet label
             self.total_var = tk.IntVar()
             self.total_var.set(1)
-            self.total_lbl = ttk.Label(self, text=f'Total Bet: ${self.total_var.get()}', font=('', 16), justify='right', foreground='red', width=11)
+            self.total_lbl = tk.Label(self, text=f'Total Bet: ${self.total_var.get()}', font=('', 16, 'bold'), justify='right', bg='black', fg='white', width=13, relief='sunken', borderwidth=6)
 
             # Balance widget
             self.balance_var = tk.IntVar()
             self.balance_var.set(BALANCE)
-            self.balance_lbl = ttk.Label(self, text=f'BALANCE: ${self.balance_var.get()}', font=('', 16))
+            self.balance_lbl = tk.Label(self, text=f'BALANCE: ${self.balance_var.get()}', font=('', 16), fg='white', borderwidth=10, relief='groove', bg='blue', width=15)
             
             # Buttons widgets and thier appearance
             self.spin_btn = tk.Button(self, text='SPIN', font=('', 16, 'bold'), width=6, height=3, relief='raised', bd=8, bg='dark green', fg='white', activebackground='green', activeforeground='white', command=self.spin)
-            self.cashout_btn = tk.Button(self, text='Cash Out', font=('', 16), relief='raised', bd=5, command=self.cashout_menu)
-
+            self.cashout_btn = tk.Button(self, text='Cash Out', font=('', 16), relief='raised', bd=5, bg='red', activebackground='#C95858', activeforeground='white', fg='white', command=self.cashout_menu)
+            
             # Grid layout for widgets inside of a control frame
-            self.bet_lbl.grid(row=0, column=0, padx=(3, 0))
-            self.bet_scl.grid(row=1,column=0, padx=(3, 0))
-            self.paylines_lbl.grid(row=0, column=1, padx=30)
-            self.paylines_scl.grid(row=1, column=1)
-            self.total_lbl.grid(row=0, column=2, padx=(0, 3))
-            self.balance_lbl.grid(row=2, columnspan=3, pady=20)
-            self.spin_btn.grid(row=3, columnspan=3)
-            self.cashout_btn.grid(row=4, columnspan=3, pady=20) 
-
+            self.bet_lbl.grid(row=0, column=0, padx=10, pady=(10, 2))
+            self.bet_scl.grid(row=1,column=0, padx=10)
+            self.paylines_lbl.grid(row=0, column=1, padx=10, pady=(10, 2))
+            self.paylines_scl.grid(row=1, column=1, padx=10)
+            self.total_lbl.grid(row=2, columnspan=2, pady=(10,0))
+            self.balance_lbl.grid(row=3, columnspan=2, pady=20)
+            self.spin_btn.grid(row=4, columnspan=2)
+            self.cashout_btn.grid(row=5, columnspan=2, pady=20) 
+            
+            # Set variable that stores self.after which controls flashing of a line indicator labels to None
+            self.flash = None
             
         def cashout_menu(self):
             '''Opens cashout menu window'''
-            answer = messagebox.askyesno('CASH-OUT', f'${self.balance_var.get()} collected! Start a new game?')
-            if answer:
-                self.balance_var.set(BALANCE)
-                self.balance_lbl.config(text=f'Balance: ${self.balance_var.get()}')
-            else:
-                self.quit()
+            answer1 = messagebox.askyesno('CASH-OUT', 'Finish the game and collect winnings?')
+            # If yes (true) open anoter messagebox
+            if answer1:                
+                answer2 = messagebox.askyesno('CASH-OUT', f'${self.balance_var.get()} collected! Start a new game?')
+                if answer2:
+                    self.balance_var.set(BALANCE)
+                    self.balance_lbl.config(text=f'Balance: ${self.balance_var.get()}')
+                    # If flshing of labels (line indicators) is active (flash_1 is not None), cancel it and revert all lines to back to their default appearance
+                    if self.flash:
+                        self.after_cancel(self.flash)
+                        self.flash = None
+                        self.reset_flash(self.flashing_labels)
+                else:
+                    self.quit()
             
                             
         def update_bet(self, *args):
@@ -168,6 +179,12 @@ class SlotMachine(tk.Tk):
             game.line33.config(background='green' if self.payline_var.get() == 3 else 'red', relief='raised' if self.payline_var.get() == 3 else 'sunken')
             
             
+        def update_balance(self, m):
+            '''Takes in multiplier and updates balance'''
+            self.balance_var.set(self.balance_var.get() + self.total_var.get()*m)
+            self.balance_lbl.config(text=f'Balance: ${self.balance_var.get()}')
+            
+            
         def spin_reels(self, lines):
             '''Takes number of payline and simulates spinning of reels'''
             symbols = [game.a, game.b, game.c, game.d, game.e]
@@ -187,9 +204,23 @@ class SlotMachine(tk.Tk):
             game.slot_3x2.canvas.create_image(75, 75, image=reels[1][2])
             game.slot_3x3.canvas.create_image(75, 75, image=reels[2][2])
             
+            # List that will store line indicators (lables) from winning lines
+            self.flashing_labels = []
+            
             # Compare symbols in appropriate positions by using all() function which returns true if all items in iterable are true
             for line in range(lines):
                 if all(reels[i][line] == reels[j][line] for i, j in [(0, 1), (1, 2)]):
+                    # Add line indicators to flashing_labels list
+                    if line == 0:
+                        self.flashing_labels.append(game.line1)
+                        self.flashing_labels.append(game.line11)
+                    if line == 1:
+                        self.flashing_labels.append(game.line2)
+                        self.flashing_labels.append(game.line22)
+                    if line == 2:
+                        self.flashing_labels.append(game.line3)
+                        self.flashing_labels.append(game.line33)
+                        
                     # Winnings (multipliers per symbol)
                     match reels[0][line]:
                         case game.a:
@@ -202,16 +233,20 @@ class SlotMachine(tk.Tk):
                             self.update_balance(6)
                         case game.e:
                             self.update_balance(8)
-        
-        
-        def update_balance(self, m):
-            '''Takes in multiplier and updates balance'''
-            self.balance_var.set(self.balance_var.get() + self.total_var.get()*m)
-            self.balance_lbl.config(text=f'Balance: ${self.balance_var.get()}')
-        
+            
+            # Pass in flashing_lables list to flash function to simulate flashing of a label               
+            if self.flashing_labels:
+                self.flash_first(self.flashing_labels)
+
 
         def spin(self):
             '''Spinning functionality'''
+            
+            # If flshing of labels (line indicators) is active (flash_1 is not None), cancel it and revert all lines to back to their default appearance
+            if self.flash:
+                self.after_cancel(self.flash)
+                self.flash = None
+                self.reset_flash(self.flashing_labels)
             
             # Check for insufficient credits
             if self.balance_var.get() < self.total_var.get():
@@ -233,7 +268,25 @@ class SlotMachine(tk.Tk):
                 else:
                     self.quit()
             
-                    
+  
+        def flash_first(self, labels_list):
+            '''Takes labels (line indicators) from winning lines and swaps background and foreground colors then calls flash2()'''
+            for lbl in labels_list:
+                lbl.config(background='white', foreground='green')
+            self.flash = self.after(250, self.flash_second, labels_list)
+            
+        def flash_second(self, labels_list):
+            '''Takes labels (line indicators) from winning lines and swaps background and foreground colors then calls flash1()'''
+            for lbl in labels_list:
+                lbl.config(background='green', foreground='white')
+            self.flash = self.after(250, self.flash_first, labels_list)
+            
+        def reset_flash(self, labels_list):
+            '''Takes lables from winning lines and sets their colors to default ones'''
+            for lbl in labels_list:
+                lbl.config(background='green', foreground='white')
+            
+                 
 
 
 if __name__ == '__main__':
