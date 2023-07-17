@@ -3,8 +3,9 @@ from tkinter import ttk, messagebox
 import random
 
 
-# Starting balance
+# Starting balance and probability for each symbol to appear (from least to most valuable)
 BALANCE = 200
+PROBABLILITY = [0.4, 0.4, 0.1, 0.05, 0.05]
 
 
 class SlotMachine(tk.Tk):
@@ -33,6 +34,9 @@ class SlotMachine(tk.Tk):
             messagebox.showerror('ERROR', error_message)
             return
             
+        # List of symbols
+        self.symbols_list = [self.a, self.b, self.c, self.d, self.e]
+        
         # Set background of entire window
         bg_label = ttk.Label(self, image=self.bg)
         bg_label.place(x=0, y=0)
@@ -139,24 +143,7 @@ class SlotMachine(tk.Tk):
             
             # Set variable that stores self.after which controls flashing of a line indicator labels to None
             self.flash = None
-            
-        def cashout_menu(self):
-            '''Opens cashout menu window'''
-            answer1 = messagebox.askyesno('CASH-OUT', 'Finish the game and collect winnings?')
-            # If yes (true) open anoter messagebox
-            if answer1:                
-                answer2 = messagebox.askyesno('CASH-OUT', f'${self.balance_var.get()} collected! Start a new game?')
-                if answer2:
-                    self.balance_var.set(BALANCE)
-                    self.balance_lbl.config(text=f'Balance: ${self.balance_var.get()}')
-                    # If flashing of labels (line indicators) for winning lines is active (self.flash is not None), cancel it and revert all lines to back to their default appearance
-                    if self.flash:
-                        self.after_cancel(self.flash)
-                        self.flash = None
-                        self.reset_flash(self.flashing_labels)
-                else:
-                    self.quit()
-            
+                      
                             
         def update_bet(self, *args):
             '''Updates text value of bet (bet_lbl) widget based on a scale value and total'''
@@ -184,13 +171,59 @@ class SlotMachine(tk.Tk):
             self.balance_lbl.config(text=f'Balance: ${self.balance_var.get()}')
             
             
-        def spin_reels(self, lines):
-            '''Takes number of payline and simulates spinning of reels'''
-            symbols = [game.a, game.b, game.c, game.d, game.e]
-            probability = [0.4, 0.4, 0.1, 0.05, 0.05]
+        def spin(self):
+            '''Spinning functionality'''
+            
+            # If flashing of labels (line indicators) for winning lines is active (self.flash not None), cancel it and revert all lines to back to their default appearance (reset_flash())
+            if self.flash:
+                self.after_cancel(self.flash)
+                self.flash = None
+                self.reset_flash(self.flashing_labels)
+            
+            # Check for insufficient credits
+            if self.balance_var.get() < self.total_var.get():
+                messagebox.showinfo('Insufficient Credits', 'Not enough credits!')
+                return
+            
+            # Update balance (pass in -1 to substract amount of total bet from balance)
+            self.update_balance(-1)
+            
+            # Start spin animation
+            self.spin_animation(game.symbols_list, 15)
+            
+            # Check for game over and show a message
+            if self.balance_var.get() == 0:
+                answer = messagebox.askyesno('GAME OVER', 'Start a new game?')
+                if answer:
+                    self.balance_var.set(BALANCE)
+                    self.balance_lbl.config(text=f'Balance: ${self.balance_var.get()}')
+                else:
+                    self.quit()
+                    
+                    
+        def spin_animation(self, symbols, counter):
+            '''Takes in symbols list and counter, simulates spinning'''
+            if counter != 0:
+                game.slot_1x1.canvas.create_image(75, 75, image=random.choice(symbols))
+                game.slot_1x2.canvas.create_image(75, 75, image=random.choice(symbols))
+                game.slot_1x3.canvas.create_image(75, 75, image=random.choice(symbols))
+                game.slot_2x1.canvas.create_image(75, 75, image=random.choice(symbols))
+                game.slot_2x2.canvas.create_image(75, 75, image=random.choice(symbols))
+                game.slot_2x3.canvas.create_image(75, 75, image=random.choice(symbols))
+                game.slot_3x1.canvas.create_image(75, 75, image=random.choice(symbols))
+                game.slot_3x2.canvas.create_image(75, 75, image=random.choice(symbols))
+                game.slot_3x3.canvas.create_image(75, 75, image=random.choice(symbols))
+                self.after(150, self.spin_animation, symbols, counter - 1)
+            else:
+                # Spin the reels one final time and check for winnings
+                self.spin_check(self.payline_var.get())
+                
+                          
+        def spin_check(self, lines):
+            '''Takes number of payline, simulates spinning of reels and check winnings'''
             
             # Randomly generate 3 lists using nested list comprehension
-            reels = [[random.choices(symbols, probability)[0] for _ in range(3)] for _ in range(3)]
+            reels = [[random.choices(game.symbols_list, PROBABLILITY)[0] for _ in range(3)] for _ in range(3)]
            
             # Display randomly choosen symbol on the corresponding slot of the reel (line 1 set to the middle row, line 2 top row, lin 3 bottom row)
             game.slot_1x1.canvas.create_image(75, 75, image=reels[0][1])
@@ -236,36 +269,6 @@ class SlotMachine(tk.Tk):
             # Pass in flashing_lables list to flash_labels() function to simulate flashing of a label             
             if self.flashing_labels:
                 self.flash_labels(self.flashing_labels)
-
-
-        def spin(self):
-            '''Spinning functionality'''
-            
-            # If flashing of labels (line indicators) for winning lines is active (self.flash not None), cancel it and revert all lines to back to their default appearance (reset_flash())
-            if self.flash:
-                self.after_cancel(self.flash)
-                self.flash = None
-                self.reset_flash(self.flashing_labels)
-            
-            # Check for insufficient credits
-            if self.balance_var.get() < self.total_var.get():
-                messagebox.showinfo('Insufficient Credits', 'Not enough credits!')
-                return
-            
-            # Update balance (pass in -1 to substract amount of total bet from balance)
-            self.update_balance(-1)
-            
-            # Spin the reels and check for winnings
-            self.spin_reels(self.payline_var.get())
-            
-            # Check for game over and show a message
-            if self.balance_var.get() == 0:
-                answer = messagebox.askyesno('GAME OVER', 'Start a new game?')
-                if answer:
-                    self.balance_var.set(BALANCE)
-                    self.balance_lbl.config(text=f'Balance: ${self.balance_var.get()}')
-                else:
-                    self.quit()
             
   
         def flash_labels(self, labels_list):
@@ -281,6 +284,24 @@ class SlotMachine(tk.Tk):
             '''Takes lables (line indicators) from winning (flashing) lines and sets their colors to default ones in case they end up in revert order'''
             for lbl in labels_list:
                 lbl.config(background='green', foreground='white')
+        
+        
+        def cashout_menu(self):
+            '''Opens cashout menu window'''
+            answer1 = messagebox.askyesno('CASH-OUT', 'Finish the game and collect winnings?')
+            # If yes (true) open anoter messagebox
+            if answer1:                
+                answer2 = messagebox.askyesno('CASH-OUT', f'${self.balance_var.get()} collected! Start a new game?')
+                if answer2:
+                    self.balance_var.set(BALANCE)
+                    self.balance_lbl.config(text=f'Balance: ${self.balance_var.get()}')
+                    # If flashing of labels (line indicators) for winning lines is active (self.flash is not None), cancel it and revert all lines to back to their default appearance
+                    if self.flash:
+                        self.after_cancel(self.flash)
+                        self.flash = None
+                        self.reset_flash(self.flashing_labels)
+                else:
+                    self.quit()
             
                  
 
