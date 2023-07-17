@@ -1,11 +1,10 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import random
-import time
 
 
+# Starting balance
 BALANCE = 200
-
 
 
 class SlotMachine(tk.Tk):
@@ -150,7 +149,7 @@ class SlotMachine(tk.Tk):
                 if answer2:
                     self.balance_var.set(BALANCE)
                     self.balance_lbl.config(text=f'Balance: ${self.balance_var.get()}')
-                    # If flshing of labels (line indicators) is active (flash_1 is not None), cancel it and revert all lines to back to their default appearance
+                    # If flashing of labels (line indicators) for winning lines is active (self.flash is not None), cancel it and revert all lines to back to their default appearance
                     if self.flash:
                         self.after_cancel(self.flash)
                         self.flash = None
@@ -234,15 +233,15 @@ class SlotMachine(tk.Tk):
                         case game.e:
                             self.update_balance(8)
             
-            # Pass in flashing_lables list to flash function to simulate flashing of a label               
+            # Pass in flashing_lables list to flash_labels() function to simulate flashing of a label             
             if self.flashing_labels:
-                self.flash_first(self.flashing_labels)
+                self.flash_labels(self.flashing_labels)
 
 
         def spin(self):
             '''Spinning functionality'''
             
-            # If flshing of labels (line indicators) is active (flash_1 is not None), cancel it and revert all lines to back to their default appearance
+            # If flashing of labels (line indicators) for winning lines is active (self.flash not None), cancel it and revert all lines to back to their default appearance (reset_flash())
             if self.flash:
                 self.after_cancel(self.flash)
                 self.flash = None
@@ -259,7 +258,7 @@ class SlotMachine(tk.Tk):
             # Spin the reels and check for winnings
             self.spin_reels(self.payline_var.get())
             
-            # Check for game over
+            # Check for game over and show a message
             if self.balance_var.get() == 0:
                 answer = messagebox.askyesno('GAME OVER', 'Start a new game?')
                 if answer:
@@ -269,20 +268,17 @@ class SlotMachine(tk.Tk):
                     self.quit()
             
   
-        def flash_first(self, labels_list):
-            '''Takes labels (line indicators) from winning lines and swaps background and foreground colors then calls flash2()'''
+        def flash_labels(self, labels_list):
+            '''Takes labels (line indicators) from winning lines and swaps background and foreground colors repeatedly using recursion'''
             for lbl in labels_list:
-                lbl.config(background='white', foreground='green')
-            self.flash = self.after(250, self.flash_second, labels_list)
+                bg = lbl.cget('background')
+                fg = lbl.cget('foreground')
+                lbl.config(background=fg, foreground=bg)
+            self.flash = self.after(500, self.flash_labels, labels_list)
             
-        def flash_second(self, labels_list):
-            '''Takes labels (line indicators) from winning lines and swaps background and foreground colors then calls flash1()'''
-            for lbl in labels_list:
-                lbl.config(background='green', foreground='white')
-            self.flash = self.after(250, self.flash_first, labels_list)
-            
+        
         def reset_flash(self, labels_list):
-            '''Takes lables from winning lines and sets their colors to default ones'''
+            '''Takes lables (line indicators) from winning (flashing) lines and sets their colors to default ones in case they end up in revert order'''
             for lbl in labels_list:
                 lbl.config(background='green', foreground='white')
             
