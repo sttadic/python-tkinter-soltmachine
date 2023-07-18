@@ -19,15 +19,15 @@ class SlotMachine(tk.Tk):
         self.resizable(False, False)
         
         # Load image files
-        self.bg = tk.PhotoImage(file = 'background.png')
-        
-        # Load symbol images
         try:
-            self.a = tk.PhotoImage(file='01.png')
-            self.b = tk.PhotoImage(file='02.png')
-            self.c = tk.PhotoImage(file='03.png')
-            self.d = tk.PhotoImage(file='04.png')
-            self.e = tk.PhotoImage(file='05.png')
+            # Background
+            self.bg = tk.PhotoImage(file = 'images/background.png')
+            # Symbols
+            self.a = tk.PhotoImage(file='images/01.png')
+            self.b = tk.PhotoImage(file='images/02.png')
+            self.c = tk.PhotoImage(file='images/03.png')
+            self.d = tk.PhotoImage(file='images/04.png')
+            self.e = tk.PhotoImage(file='images/05.png')
         except Exception as ex:
             format_ = "Error Occured: {0}.\nArguments: {1!r}"
             error_message = format_.format(type(ex).__name__, ex.args)
@@ -42,7 +42,7 @@ class SlotMachine(tk.Tk):
         bg_label.place(x=0, y=0)
 
         # Message displaying information during the game
-        self.msg_lbl = ttk.Label(self, text='Welcome to Dino Hunt! Spin to start.', font=('Arial', 18), foreground='white', background='blue', width=35, anchor='center', relief='groove', borderwidth=10)
+        self.msg_lbl = ttk.Label(self, text='Welcome to Dino Hunt!  SPIN to start.', font=('Arial', 18), foreground='white', background='blue', width=35, anchor='center', relief='groove', borderwidth=10)
         self.msg_lbl.grid(row=0, column=1, columnspan=3, pady=10)
         
         # Paylines played (line indicator) widgets
@@ -69,7 +69,7 @@ class SlotMachine(tk.Tk):
             '''A class representing slot for a symbol'''
             def __init__(self, container):
                 self.canvas = tk.Canvas(container, relief='groove', borderwidth=6, width=150, height=150)
-                
+            
         # Create slots for symblos
         self.slot_1x1 = Slot(slot_frm)
         self.slot_1x2 = Slot(slot_frm)
@@ -177,7 +177,7 @@ class SlotMachine(tk.Tk):
                 total_win += self.total_var.get() * multiplier
             self.balance_var.set(self.balance_var.get() + total_win)
             self.balance_lbl.config(text=f'Balance: ${self.balance_var.get()}')
-            # Update message, if last element of list passed in is not 0, it means a winning spin
+            # Update message, if last element of list passed in is not 0, it means it's a winning spin
             if multipliers[-1] != 0:
                 game.msg_lbl.config(text=f'You won ${total_win}!')
             else:
@@ -213,7 +213,7 @@ class SlotMachine(tk.Tk):
             self.bet_scl.config(state='disabled')
             self.spin_btn.config(state='disabled')
             self.cashout_btn.config(state='disabled')
-            # Randomly choose and display symbols counter number of times
+            # Randomly choose and display symbols 'counter' number of times
             if counter != 0:
                 game.msg_lbl.config(text=f'Spinning...')
                 game.slot_1x1.canvas.create_image(75, 75, image=random.choice(symbols))
@@ -238,7 +238,7 @@ class SlotMachine(tk.Tk):
         def spin_check(self, lines):
             '''Takes number of payline, simulates spinning of reels and check winnings'''
             
-            # Randomly generate 3 lists using nested list comprehension
+            # Create 3 lists or randomly selected symbols using nested list comprehension
             reels = [[random.choices(game.symbols_list, PROBABLILITY)[0] for _ in range(3)] for _ in range(3)]
            
             # Display randomly choosen symbol on the corresponding slot of the reel (line 1 set to the middle row, line 2 top row, lin 3 bottom row)
@@ -252,9 +252,9 @@ class SlotMachine(tk.Tk):
             game.slot_3x2.canvas.create_image(75, 75, image=reels[1][2])
             game.slot_3x3.canvas.create_image(75, 75, image=reels[2][2])
             
-            # List that will store line indicators (lables) from winning lines
+            # List to store line indicators (lables) from winning lines
             self.flashing_labels = []
-            # List that stores winning multipliers, 0 is hardcoded into so update_balance function can check if there are no winning lines for msg_label updates
+            # List that stores winning multipliers, 0 is hardcoded so update_balance function can check if there are no winning lines for msg_label updates
             win_multipliers = [0]
             
             # Compare symbols in appropriate positions by using all() function which returns true if all items in iterable are true
@@ -271,7 +271,7 @@ class SlotMachine(tk.Tk):
                         self.flashing_labels.append(game.line3)
                         self.flashing_labels.append(game.line33)
                         
-                    # Winnings (multipliers per symbol)
+                    # Add multipliers for each symbol to win_multipliers list
                     match reels[0][line]:
                         case game.a:
                             win_multipliers.append(2)
@@ -287,7 +287,7 @@ class SlotMachine(tk.Tk):
             # Pass in a list win_multipliers to update_balance function
             self.update_balance(win_multipliers)
             
-            # Pass in flashing_lables list to flash_labels() function to simulate flashing of a label             
+            # Pass in flashing_lables list to flash_labels() function            
             if self.flashing_labels:
                 self.flash_labels(self.flashing_labels)
                 
@@ -298,7 +298,7 @@ class SlotMachine(tk.Tk):
                 if answer:
                     self.balance_var.set(BALANCE)
                     self.balance_lbl.config(text=f'Balance: ${self.balance_var.get()}')
-                    game.msg_lbl.config(text='Welcome to Dino Hunt! Spin to start.')
+                    game.msg_lbl.config(text='Welcome to Dino Hunt!  SPIN to start.')
                 else:
                     self.quit()
             
@@ -328,7 +328,7 @@ class SlotMachine(tk.Tk):
                 if answer2:
                     self.balance_var.set(BALANCE)
                     self.balance_lbl.config(text=f'Balance: ${self.balance_var.get()}')
-                    game.msg_lbl.config(text='Welcome to Dino Hunt! Spin to start.')
+                    game.msg_lbl.config(text='Welcome to Dino Hunt!  SPIN to start.')
                     # If flashing of labels (line indicators) for winning lines is active (self.flash is not None), cancel it and revert all lines to back to their default appearance
                     if self.flash:
                         self.after_cancel(self.flash)
