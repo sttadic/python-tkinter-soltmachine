@@ -3,12 +3,21 @@ from tkinter import ttk, messagebox
 import random
 
 
-# Starting balance and probability for each symbol to appear (from least to most valuable)
-BALANCE = 200
+# Starting balance
+BALANCE = 30
+# Probability for each symbol to appear (from least to most valuable)
 PROBABLILITY = [0.4, 0.3, 0.15, 0.1, 0.05]
+# Symbol multipliers (from most to the least probable)
+MULTIPLIERS = {
+    'A': 2,
+    'B': 3,
+    'C': 5,
+    'D': 7,
+    'E': 10
+}
 
                 
-                
+             
 class SlotMachine(tk.Tk):
     '''A class to represent a Slot Machine'''
     def __init__(self):
@@ -87,13 +96,13 @@ class ControlFrame(ttk.Frame):
         # Initalize IntVar to store bet value and set its default value to 1, create bet label and amount-adjust slider for bet
         self.bet_var = tk.IntVar()
         self.bet_var.set(1)
-        self.bet_lbl = tk.Label(self, text='Bet: $1', font=('', 16), relief='ridge', borderwidth=5, bg='black', fg='white', width=8)
+        self.bet_lbl = tk.Label(self, text=f'Bet: ${self.bet_var.get()}', font=('', 16), relief='ridge', borderwidth=5, bg='black', fg='white', width=8)
         self.bet_scl = tk.Scale(self, from_=1, to=10, orient='horizontal', variable=self.bet_var, bd=3, showvalue=0, troughcolor='black', bg='white', command=self.update_bet)
         
         # Paylines and amount-adjust slider for lines
         self.payline_var = tk.IntVar()
         self.payline_var.set(1)
-        self.paylines_lbl = tk.Label(self, text='Paylines: 1', font=('', 16), relief='ridge', borderwidth=5, bg='black', fg='white', width=9)
+        self.paylines_lbl = tk.Label(self, text=f'Paylines: {self.payline_var.get()}', font=('', 16), relief='ridge', borderwidth=5, bg='black', fg='white', width=9)
         self.paylines_scl = tk.Scale(self, from_=1, to=3, orient='horizontal', variable=self.payline_var, bd=3, showvalue=0, troughcolor='black', bg='white', command=self.update_lines)
 
         # Total bet label
@@ -175,7 +184,6 @@ class ControlFrame(ttk.Frame):
             self.reels = Slots(game.slot_frm)
             # Set first_spin to 1 so there wouldn't be unnecessary instantiations of a Slots
             self.first_spin = 1
-            print('first spin')
         
         # If flashing of labels (line indicators) for winning lines is active (self.flash not None), cancel it and revert all lines to back to their default appearance (reset_flash())
         if self.flash:
@@ -218,10 +226,10 @@ class ControlFrame(ttk.Frame):
             self.after(150, self.spin_animation, symbols, counter - 1)
         else:
             # Activate disabled controls and check for winnings
-            self.paylines_scl.config(state='active')
-            self.bet_scl.config(state='active')
-            self.spin_btn.config(state='active')
-            self.cashout_btn.config(state='active')
+            self.paylines_scl.config(state='normal')
+            self.bet_scl.config(state='normal')
+            self.spin_btn.config(state='normal')
+            self.cashout_btn.config(state='normal')
             self.spin_check(self.payline_var.get())
             
                         
@@ -285,10 +293,9 @@ class ControlFrame(ttk.Frame):
         if self.balance_var.get() == 0:
             game.msg_lbl.config(text='Game Over')
             answer = messagebox.askyesno('GAME OVER', 'Start a new game?')
+             # If clicked on Yes start a new game, else quit the game
             if answer:
-                self.balance_var.set(BALANCE)
-                self.balance_lbl.config(text=f'Balance: ${self.balance_var.get()}')
-                game.msg_lbl.config(text='Welcome to Dino Hunt!  SPIN to start.')
+                self.new_game()
             else:
                 self.quit()
         
@@ -314,12 +321,9 @@ class ControlFrame(ttk.Frame):
         # If yes (true) open another messagebox
         if answer1:                
             answer2 = messagebox.askyesno('CASH-OUT', f'${self.balance_var.get()} collected! Start a new game?')
-            # If clicked on Yes (new game), reset balance and message, set first_spin to 0
+            # If clicked on Yes start a new game
             if answer2:
-                self.balance_var.set(BALANCE)
-                self.balance_lbl.config(text=f'Balance: ${self.balance_var.get()}')
-                self.first_spin = 0
-                game.msg_lbl.config(text='Welcome to Dino Hunt!  SPIN to start.')
+                self.new_game()
                 # If flashing of labels (line indicators) for winning lines is active (self.flash is not None), cancel it and revert all lines to back to their default appearance
                 if self.flash:
                     self.after_cancel(self.flash)
@@ -328,6 +332,23 @@ class ControlFrame(ttk.Frame):
             # If clicked No, quit the game (close window)
             else:
                 self.quit()
+                
+        
+    def new_game(self):
+        '''Resets balance, message, line indicators and controls, sets first_spin to 0'''
+        self.balance_var.set(BALANCE)
+        self.balance_lbl.config(text=f'Balance: ${self.balance_var.get()}')
+        self.first_spin = 0
+        game.msg_lbl.config(text='Welcome to Dino Hunt!  SPIN to start.')
+        self.payline_var.set(1)
+        self.paylines_lbl.config(text=f'Paylines: {self.payline_var.get()}')
+        self.bet_var.set(1)
+        self.bet_lbl.config(text=f'Bet: ${self.bet_var.get()}')
+        self.total_var.set(1)
+        self.total_lbl.config(text=f'Total Bet: ${self.total_var.get()}')
+        lines_list = [game.line2, game.line22, game.line3, game.line33]
+        for line in lines_list:
+            line.config(background='red', foreground='white', relief='sunken')
                     
            
                     
