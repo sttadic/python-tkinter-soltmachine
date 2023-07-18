@@ -5,7 +5,7 @@ import random
 
 # Starting balance and probability for each symbol to appear (from least to most valuable)
 BALANCE = 200
-PROBABLILITY = [0.8, 0.05, 0.05, 0.05, 0.05]
+PROBABLILITY = [0.4, 0.3, 0.15, 0.1, 0.05]
 
 
 class SlotMachine(tk.Tk):
@@ -208,10 +208,12 @@ class SlotMachine(tk.Tk):
         def spin_animation(self, symbols, counter):
             '''Takes in symbols list and counter, simulates spinning'''
             
-            # Disable bet and paylines adjusting sliders while spinning
+            # Disable controls while spinning
             self.paylines_scl.config(state='disabled')
             self.bet_scl.config(state='disabled')
-            # Randomlt choose and display symbols counter number of times
+            self.spin_btn.config(state='disabled')
+            self.cashout_btn.config(state='disabled')
+            # Randomly choose and display symbols counter number of times
             if counter != 0:
                 game.msg_lbl.config(text=f'Spinning...')
                 game.slot_1x1.canvas.create_image(75, 75, image=random.choice(symbols))
@@ -225,9 +227,11 @@ class SlotMachine(tk.Tk):
                 game.slot_3x3.canvas.create_image(75, 75, image=random.choice(symbols))
                 self.after(150, self.spin_animation, symbols, counter - 1)
             else:
-                # Activate disabled sliders again and check for winnings
+                # Activate disabled controls and check for winnings
                 self.paylines_scl.config(state='active')
                 self.bet_scl.config(state='active')
+                self.spin_btn.config(state='active')
+                self.cashout_btn.config(state='active')
                 self.spin_check(self.payline_var.get())
                 
                           
