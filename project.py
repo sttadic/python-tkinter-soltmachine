@@ -4,9 +4,11 @@ import random
 
 
 # Starting balance
-BALANCE = 30
+BALANCE = 200
+
 # Probability for each symbol to appear (from least to most valuable)
 PROBABLILITY = [0.4, 0.3, 0.15, 0.1, 0.05]
+
 # Symbol multipliers (from most to the least probable)
 MULTIPLIERS = {
     'A': 2,
@@ -72,19 +74,52 @@ class SlotMachine(tk.Tk):
         self.line33.grid(row=3, column=4, padx=(0, 10))
         
         # Slot machine's frame encompasing reels (slots)
-        self.slot_frm = ttk.Frame(self, relief='sunken', borderwidth=10)
+        self.slot_frm = ttk.Frame(self, relief='sunken', borderwidth=10, width=512, height=512)
         self.slot_frm.grid(row=1, column=1, rowspan=3, columnspan=3, padx=10)
         
-        # Pay table canvas containing information about the game: eg. multiplier for specific symbol
-        self.pay_table = tk.Canvas(self.slot_frm, width=490, height=490)
-        self.pay_table.grid()
-        self.pay_table.create_image(244, 244 , image=self.pt)
+        # Pay table label as background, containing information about the game (multiplier for specific symbol)
+        self.pt_lbl = tk.Label(self.slot_frm, image=self.pt)
+        self.pt_lbl.place(x=0, y=0, width=488, height=488)
+        tk.Label(self.slot_frm, text=f'{MULTIPLIERS["A"]}', font=('', 22, 'bold'), borderwidth=8, relief='groove', bg='black', fg='white', width=2).place(x=355, y=80)
+        tk.Label(self.slot_frm, text=f'{MULTIPLIERS["B"]}', font=('', 22, 'bold'), borderwidth=8, relief='groove', bg='black', fg='white', width=2).place(x=355, y=160)
+        tk.Label(self.slot_frm, text=f'{MULTIPLIERS["C"]}', font=('', 22, 'bold'), borderwidth=8, relief='groove', bg='black', fg='white', width=2).place(x=355, y=240)
+        tk.Label(self.slot_frm, text=f'{MULTIPLIERS["D"]}', font=('', 22, 'bold'), borderwidth=8, relief='groove', bg='black', fg='white', width=2).place(x=355, y=320)
+        tk.Label(self.slot_frm, text=f'{MULTIPLIERS["E"]}', font=('', 22, 'bold'), borderwidth=8, relief='groove', bg='black', fg='white', width=2).place(x=355, y=400)
         
-        # Instance of the ControlFrame
+        # Instance of a ControlFrame
         control_frame = ControlFrame()
         control_frame.grid(row=4, column=1, columnspan=3, pady=10)
     
+
+
+class Slots:
+    '''A class to represent slots for a symbols'''
+    def __init__(self, container):
+        
     
+        # Create slots for symblos
+        self.slot_1x1 = tk.Canvas(container, relief='groove', borderwidth=6, width=150, height=150)
+        self.slot_1x2 = tk.Canvas(container, relief='groove', borderwidth=6, width=150, height=150)
+        self.slot_1x3 = tk.Canvas(container, relief='groove', borderwidth=6, width=150, height=150)
+        self.slot_2x1 = tk.Canvas(container, relief='groove', borderwidth=6, width=150, height=150)
+        self.slot_2x2 = tk.Canvas(container, relief='groove', borderwidth=6, width=150, height=150)
+        self.slot_2x3 = tk.Canvas(container, relief='groove', borderwidth=6, width=150, height=150)
+        self.slot_3x1 = tk.Canvas(container, relief='groove', borderwidth=6, width=150, height=150)
+        self.slot_3x2 = tk.Canvas(container, relief='groove', borderwidth=6, width=150, height=150)
+        self.slot_3x3 = tk.Canvas(container, relief='groove', borderwidth=6, width=150, height=150)
+        
+        # Grid layout for slots
+        self.slot_1x1.grid(row=0, column=0)
+        self.slot_1x2.grid(row=0, column=1)
+        self.slot_1x3.grid(row=0, column=2)
+        self.slot_2x1.grid(row=1, column=0)
+        self.slot_2x2.grid(row=1, column=1)
+        self.slot_2x3.grid(row=1, column=2)
+        self.slot_3x1.grid(row=2, column=0)
+        self.slot_3x2.grid(row=2, column=1)
+        self.slot_3x3.grid(row=2, column=2)
+        
+        
     
 class ControlFrame(ttk.Frame):
     '''A class to represent controls of the slot machine and its functionality'''
@@ -179,7 +214,7 @@ class ControlFrame(ttk.Frame):
         # Check wether it is a first spin (if not skip this part)
         if self.first_spin == 0:
             # Remove pay_table widget from a frame so another can take its place (slots)
-            game.pay_table.destroy()
+            game.pt_lbl.destroy()
             # Create an instance of the slots
             self.reels = Slots(game.slot_frm)
             # Set first_spin to 1 so there wouldn't be unnecessary instantiations of a Slots
@@ -350,34 +385,6 @@ class ControlFrame(ttk.Frame):
         for line in lines_list:
             line.config(background='red', foreground='white', relief='sunken')
                     
-           
-                    
-class Slots:
-    '''A class to represent slots for a symbols'''
-    def __init__(self, container):
-        
-    
-        # Create slots for symblos
-        self.slot_1x1 = tk.Canvas(container, relief='groove', borderwidth=6, width=150, height=150)
-        self.slot_1x2 = tk.Canvas(container, relief='groove', borderwidth=6, width=150, height=150)
-        self.slot_1x3 = tk.Canvas(container, relief='groove', borderwidth=6, width=150, height=150)
-        self.slot_2x1 = tk.Canvas(container, relief='groove', borderwidth=6, width=150, height=150)
-        self.slot_2x2 = tk.Canvas(container, relief='groove', borderwidth=6, width=150, height=150)
-        self.slot_2x3 = tk.Canvas(container, relief='groove', borderwidth=6, width=150, height=150)
-        self.slot_3x1 = tk.Canvas(container, relief='groove', borderwidth=6, width=150, height=150)
-        self.slot_3x2 = tk.Canvas(container, relief='groove', borderwidth=6, width=150, height=150)
-        self.slot_3x3 = tk.Canvas(container, relief='groove', borderwidth=6, width=150, height=150)
-        
-        # Grid layout for slots
-        self.slot_1x1.grid(row=0, column=0)
-        self.slot_1x2.grid(row=0, column=1)
-        self.slot_1x3.grid(row=0, column=2)
-        self.slot_2x1.grid(row=1, column=0)
-        self.slot_2x2.grid(row=1, column=1)
-        self.slot_2x3.grid(row=1, column=2)
-        self.slot_3x1.grid(row=2, column=0)
-        self.slot_3x2.grid(row=2, column=1)
-        self.slot_3x3.grid(row=2, column=2)
         
             
                  
