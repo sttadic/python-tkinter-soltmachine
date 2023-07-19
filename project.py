@@ -177,6 +177,7 @@ class ControlFrame(ttk.Frame):
         self.flash = None
         # Initialize first_spin variable and set its value to 0
         self.first_spin = 0          
+               
                         
     def update_bet(self, *args):
         '''Updates text value of bet (bet_lbl) widget based on a scale value and total'''
@@ -270,6 +271,9 @@ class ControlFrame(ttk.Frame):
             self.reels.slot_3x3.create_image(75, 75, image=random.choice(symbols))
             self.after(150, self.spin_animation, symbols, counter - 1)
         else:
+            # Clear created images and and quit sound mixer to improve performance
+            self.clear_images()
+            pygame.mixer.quit()
             # Activate disabled controls and check for winnings
             self.paylines_scl.config(state='normal')
             self.bet_scl.config(state='normal')
@@ -319,15 +323,15 @@ class ControlFrame(ttk.Frame):
                 # Add multipliers for each symbol to win_multipliers list
                 match reels[0][line]:
                     case game.a:
-                        win_multipliers.append(2)
+                        win_multipliers.append(MULTIPLIERS['A'])
                     case game.b:
-                        win_multipliers.append(3)
+                        win_multipliers.append(MULTIPLIERS['B'])
                     case game.c:
-                        win_multipliers.append(5)
+                        win_multipliers.append(MULTIPLIERS['C'])
                     case game.d:
-                        win_multipliers.append(7)
+                        win_multipliers.append(MULTIPLIERS['D'])
                     case game.e:
-                        win_multipliers.append(9)
+                        win_multipliers.append(MULTIPLIERS['E'])
         
         # Pass in a list win_multipliers to update_balance function
         self.update_balance(win_multipliers)
@@ -402,6 +406,19 @@ class ControlFrame(ttk.Frame):
             line.config(background='red', foreground='white', relief='sunken')
         self.first_spin = 0
         play_sound('sounds/new_game.wav')
+        
+    
+    def clear_images(self):
+        '''Clears created images from each slot'''
+        self.reels.slot_1x1.delete('all')
+        self.reels.slot_1x2.delete('all')
+        self.reels.slot_1x3.delete('all')
+        self.reels.slot_2x1.delete('all')
+        self.reels.slot_2x2.delete('all')
+        self.reels.slot_2x3.delete('all')
+        self.reels.slot_3x1.delete('all')
+        self.reels.slot_3x2.delete('all')
+        self.reels.slot_3x3.delete('all')
                     
         
             
