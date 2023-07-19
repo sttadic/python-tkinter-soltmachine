@@ -4,7 +4,7 @@ import random
 
 
 # Starting balance
-BALANCE = 200
+BALANCE = 20
 
 # Probability for each symbol to appear (from least to most valuable)
 PROBABLILITY = [0.4, 0.3, 0.15, 0.1, 0.05]
@@ -95,7 +95,6 @@ class SlotMachine(tk.Tk):
 class Slots:
     '''A class to represent slots for a symbols'''
     def __init__(self, container):
-        
     
         # Create slots for symblos
         self.slot_1x1 = tk.Canvas(container, relief='groove', borderwidth=6, width=150, height=150)
@@ -211,10 +210,8 @@ class ControlFrame(ttk.Frame):
     def spin(self):
         '''Spinning functionality'''
         
-        # Check wether it is a first spin (if not skip this part)
+        # Check whether it is a first spin (if not skip this part)
         if self.first_spin == 0:
-            # Remove pay_table widget from a frame so another can take its place (slots)
-            game.pt_lbl.destroy()
             # Create an instance of the slots
             self.reels = Slots(game.slot_frm)
             # Set first_spin to 1 so there wouldn't be unnecessary instantiations of a Slots
@@ -228,7 +225,7 @@ class ControlFrame(ttk.Frame):
         
         # Check for insufficient credits
         if self.balance_var.get() < self.total_var.get():
-            messagebox.showinfo('Insufficient Credits', 'Not enough credits!')
+            messagebox.showinfo('Insufficient Balance', 'Not enough credits!')
             return
         
         # Update balance (pass in -1 to substract amount of total bet from balance)
@@ -326,7 +323,7 @@ class ControlFrame(ttk.Frame):
             
         # Check for game over and show a message
         if self.balance_var.get() == 0:
-            game.msg_lbl.config(text='Game Over')
+            game.msg_lbl.config(text='Game Over', background='red')
             answer = messagebox.askyesno('GAME OVER', 'Start a new game?')
              # If clicked on Yes start a new game, else quit the game
             if answer:
@@ -374,7 +371,7 @@ class ControlFrame(ttk.Frame):
         self.balance_var.set(BALANCE)
         self.balance_lbl.config(text=f'Balance: ${self.balance_var.get()}')
         self.first_spin = 0
-        game.msg_lbl.config(text='Welcome to Dino Hunt!  SPIN to start.')
+        game.msg_lbl.config(text='Welcome to Dino Hunt!  SPIN to start.', background='blue')
         self.payline_var.set(1)
         self.paylines_lbl.config(text=f'Paylines: {self.payline_var.get()}')
         self.bet_var.set(1)
