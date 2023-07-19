@@ -1,10 +1,11 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import random
+import pygame
 
 
 # Starting balance
-BALANCE = 20
+BALANCE = 200
 
 # Probability for each symbol to appear (from least to most valuable)
 PROBABLILITY = [0.4, 0.3, 0.15, 0.1, 0.05]
@@ -18,6 +19,12 @@ MULTIPLIERS = {
     'E': 10
 }
 
+
+def play_sound(file):
+    '''Play a sound file'''
+    pygame.mixer.init()
+    pygame.mixer.music.load(file)
+    pygame.mixer.music.play()
                 
              
 class SlotMachine(tk.Tk):
@@ -29,6 +36,9 @@ class SlotMachine(tk.Tk):
         # Set title and non-resizable root window
         self.title('DINO HUNT')
         self.resizable(False, False)
+        
+        # Play sound
+        play_sound('sounds/new_game.wav')
         
         # Load image files
         try:
@@ -237,12 +247,15 @@ class ControlFrame(ttk.Frame):
                 
     def spin_animation(self, symbols, counter):
         '''Takes in symbols list and counter, simulates spinning'''
-        
-        # Disable controls while spinning
-        self.paylines_scl.config(state='disabled')
-        self.bet_scl.config(state='disabled')
-        self.spin_btn.config(state='disabled')
-        self.cashout_btn.config(state='disabled')
+        # Run this part only once (if counter  == 12)
+        if counter == 12:
+            # Play spin sound
+            play_sound('sounds/spin.wav')
+            # Disable controls while spinning
+            self.paylines_scl.config(state='disabled')
+            self.bet_scl.config(state='disabled')
+            self.spin_btn.config(state='disabled')
+            self.cashout_btn.config(state='disabled')
         # Randomly choose and display symbols 'counter' number of times
         if counter != 0:
             game.msg_lbl.config(text=f'Spinning...')
@@ -290,6 +303,8 @@ class ControlFrame(ttk.Frame):
         # Compare symbols in appropriate positions by using all() function which returns true if all items in iterable are true
         for line in range(lines):
             if all(reels[i][line] == reels[j][line] for i, j in [(0, 1), (1, 2)]):
+                # Win sound
+                play_sound('sounds/win.wav')
                 # Add line indicators to flashing_labels list
                 if line == 0:
                     self.flashing_labels.append(game.line1)
@@ -323,6 +338,7 @@ class ControlFrame(ttk.Frame):
             
         # Check for game over and show a message
         if self.balance_var.get() == 0:
+            play_sound('sounds/game_over.wav')
             game.msg_lbl.config(text='Game Over', background='red')
             answer = messagebox.askyesno('GAME OVER', 'Start a new game?')
              # If clicked on Yes start a new game, else quit the game
@@ -367,10 +383,9 @@ class ControlFrame(ttk.Frame):
                 
         
     def new_game(self):
-        '''Resets balance, message, line indicators and controls, sets first_spin to 0'''
+        '''Resets balance, message, line indicators and controls, sets first_spin to 0 and plays sound'''
         self.balance_var.set(BALANCE)
         self.balance_lbl.config(text=f'Balance: ${self.balance_var.get()}')
-        self.first_spin = 0
         game.msg_lbl.config(text='Welcome to Dino Hunt!  SPIN to start.', background='blue')
         self.payline_var.set(1)
         self.paylines_lbl.config(text=f'Paylines: {self.payline_var.get()}')
@@ -378,9 +393,15 @@ class ControlFrame(ttk.Frame):
         self.bet_lbl.config(text=f'Bet: ${self.bet_var.get()}')
         self.total_var.set(1)
         self.total_lbl.config(text=f'Total Bet: ${self.total_var.get()}')
+        if self.flash:
+            self.after_cancel(self.flash)
+            self.flash = None
+            self.reset_flash(self.flashing_labels)
         lines_list = [game.line2, game.line22, game.line3, game.line33]
         for line in lines_list:
             line.config(background='red', foreground='white', relief='sunken')
+        self.first_spin = 0
+        play_sound('sounds/new_game.wav')
                     
         
             
