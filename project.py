@@ -23,7 +23,14 @@ MULTIPLIERS = {
 def play_sound(file):
     '''Play a sound file'''
     pygame.mixer.init()
-    pygame.mixer.music.load(file)
+    # Load sound files with error handling
+    try:
+        pygame.mixer.music.load(file)
+    except Exception as ex:
+        format_ = "Error Occured: {0}.\nArguments: {1!r}"
+        error_message = format_.format(type(ex).__name__, ex.args)
+        messagebox.showerror('ERROR', error_message)
+        return
     pygame.mixer.music.play()
                 
              
@@ -40,7 +47,7 @@ class SlotMachine(tk.Tk):
         # Play sound
         play_sound('sounds/new_game.wav')
         
-        # Load image files
+        # Load image files with error handling
         try:
             # Background
             self.bg = tk.PhotoImage(file = 'images/background.png')
