@@ -20,18 +20,11 @@ MULTIPLIERS = {
 }
 
 
-def play_sound(file):
-    '''Play a sound file'''
-    pygame.mixer.init()
-    # Load sound files with error handling
-    try:
-        pygame.mixer.music.load(file)
-    except Exception as ex:
-        format_ = "Error Occured: {0}.\nArguments: {1!r}"
-        error_message = format_.format(type(ex).__name__, ex.args)
-        messagebox.showerror('ERROR', error_message)
-        return
-    pygame.mixer.music.play()
+def main():
+    '''Instantiate class SlotMachine and and start main event loop'''
+    game = SlotMachine()
+    game.mainloop()
+
                 
              
 class SlotMachine(tk.Tk):
@@ -45,7 +38,7 @@ class SlotMachine(tk.Tk):
         self.resizable(False, False)
         
         # Play sound
-        play_sound('sounds/new_game.wav')
+        self.play_sound('sounds/new_game.wav')
         
         # Load image files with error handling
         try:
@@ -103,9 +96,23 @@ class SlotMachine(tk.Tk):
         tk.Label(self.slot_frm, text=f'{MULTIPLIERS["D"]}', font=('', 22, 'bold'), borderwidth=8, relief='groove', bg='black', fg='white', width=2).place(x=355, y=320)
         tk.Label(self.slot_frm, text=f'{MULTIPLIERS["E"]}', font=('', 22, 'bold'), borderwidth=8, relief='groove', bg='black', fg='white', width=2).place(x=355, y=400)
         
-        # Instance of a ControlFrame
-        control_frame = ControlFrame()
+        # Instance of a ControlFrame (pass SlotMachine instance as an argument)
+        control_frame = ControlFrame(self)
         control_frame.grid(row=4, column=1, columnspan=3, pady=10)
+        
+        
+    def play_sound(self, file):
+        '''Play a sound file'''
+        pygame.mixer.init()
+        # Load sound files, error handling
+        try:
+            pygame.mixer.music.load(file)
+        except Exception as ex:
+            format_ = "Error Occured: {0}.\nArguments: {1!r}"
+            error_message = format_.format(type(ex).__name__, ex.args)
+            messagebox.showerror('ERROR', error_message)
+            return
+        pygame.mixer.music.play()
     
 
 
@@ -139,9 +146,13 @@ class Slots:
     
 class ControlFrame(ttk.Frame):
     '''A class to represent controls of the slot machine and its functionality'''
-    def __init__(self):
+    def __init__(self, slot_machine):
         super().__init__()
         
+        # Store a reference to the SlotMachine instance
+        self.slot_machine = slot_machine
+        
+        # Configure control frame
         self.config(relief='raised', borderwidth=10)
         
         # Initalize IntVar to store bet value and set its default value to 1, create bet label and amount-adjust slider for bet
@@ -182,6 +193,7 @@ class ControlFrame(ttk.Frame):
         
         # Set variable that stores self.after which controls flashing of a line indicator labels to None
         self.flash = None
+        
         # Initialize first_spin variable and set its value to 0
         self.first_spin = 0          
                
@@ -205,10 +217,10 @@ class ControlFrame(ttk.Frame):
             self.flash = None
             self.reset_flash(self.flashing_labels)
         # Lines indicator update using ternary conditional operator
-        game.line2.config(background='green' if self.payline_var.get() >= 2 else 'red', relief='raised' if self.payline_var.get() >= 2 else 'sunken')
-        game.line22.config(background='green' if self.payline_var.get() >= 2 else 'red', relief='raised' if self.payline_var.get() >= 2 else 'sunken')
-        game.line3.config(background='green' if self.payline_var.get() == 3 else 'red', relief='raised' if self.payline_var.get() == 3 else 'sunken')
-        game.line33.config(background='green' if self.payline_var.get() == 3 else 'red', relief='raised' if self.payline_var.get() == 3 else 'sunken')
+        self.slot_machine.line2.config(background='green' if self.payline_var.get() >= 2 else 'red', relief='raised' if self.payline_var.get() >= 2 else 'sunken')
+        self.slot_machine.line22.config(background='green' if self.payline_var.get() >= 2 else 'red', relief='raised' if self.payline_var.get() >= 2 else 'sunken')
+        self.slot_machine.line3.config(background='green' if self.payline_var.get() == 3 else 'red', relief='raised' if self.payline_var.get() == 3 else 'sunken')
+        self.slot_machine.line33.config(background='green' if self.payline_var.get() == 3 else 'red', relief='raised' if self.payline_var.get() == 3 else 'sunken')
         
         
     def update_balance(self, multipliers):
@@ -220,9 +232,9 @@ class ControlFrame(ttk.Frame):
         self.balance_lbl.config(text=f'Balance: ${self.balance_var.get()}')
         # Update message, if last element of list passed in is not 0, it means it's a winning spin
         if multipliers[-1] != 0:
-            game.msg_lbl.config(text=f'You won ${total_win}!')
+            self.slot_machine.msg_lbl.config(text=f'You won ${total_win}!')
         else:
-            game.msg_lbl.config(text=f'Better luck next time.')
+            self.slot_machine.msg_lbl.config(text=f'Better luck next time.')
         
     
     def spin(self):
@@ -231,7 +243,7 @@ class ControlFrame(ttk.Frame):
         # Check whether it is a first spin (if not skip this part)
         if self.first_spin == 0:
             # Create an instance of the slots
-            self.reels = Slots(game.slot_frm)
+            self.reels = Slots(self.slot_machine.slot_frm)
             # Set first_spin to 1 so there wouldn't be unnecessary instantiations of a Slots
             self.first_spin = 1
         
@@ -250,7 +262,7 @@ class ControlFrame(ttk.Frame):
         self.update_balance([-1])
         
         # Start spin animation
-        self.spin_animation(game.symbols_list, 12)
+        self.spin_animation(self.slot_machine.symbols_list, 12)
                 
                 
     def spin_animation(self, symbols, counter):
@@ -258,7 +270,7 @@ class ControlFrame(ttk.Frame):
         # Run this part only once (if counter  == 12)
         if counter == 12:
             # Play spin sound
-            play_sound('sounds/spin.wav')
+            self.slot_machine.play_sound('sounds/spin.wav')
             # Disable controls while spinning
             self.paylines_scl.config(state='disabled')
             self.bet_scl.config(state='disabled')
@@ -266,7 +278,7 @@ class ControlFrame(ttk.Frame):
             self.cashout_btn.config(state='disabled')
         # Randomly choose and display symbols 'counter' number of times
         if counter != 0:
-            game.msg_lbl.config(text=f'Spinning...')
+            self.slot_machine.msg_lbl.config(text=f'Spinning...')
             self.reels.slot_1x1.create_image(75, 75, image=random.choice(symbols))
             self.reels.slot_1x2.create_image(75, 75, image=random.choice(symbols))
             self.reels.slot_1x3.create_image(75, 75, image=random.choice(symbols))
@@ -293,7 +305,7 @@ class ControlFrame(ttk.Frame):
         '''Takes number of payline, simulates spinning of reels and check winnings'''
         
         # Create 3 lists or randomly selected symbols using nested list comprehension
-        reels = [[random.choices(game.symbols_list, PROBABLILITY)[0] for _ in range(3)] for _ in range(3)]
+        reels = [[random.choices(self.slot_machine.symbols_list, PROBABLILITY)[0] for _ in range(3)] for _ in range(3)]
         
         # Display randomly choosen symbol on the corresponding slot of the reel (line 1 set to the middle row, line 2 top row, lin 3 bottom row)
         self.reels.slot_1x1.create_image(75, 75, image=reels[0][1])
@@ -315,29 +327,29 @@ class ControlFrame(ttk.Frame):
         for line in range(lines):
             if all(reels[i][line] == reels[j][line] for i, j in [(0, 1), (1, 2)]):
                 # Win sound
-                play_sound('sounds/win.wav')
+                self.slot_machine.play_sound('sounds/win.wav')
                 # Add line indicators to flashing_labels list
                 if line == 0:
-                    self.flashing_labels.append(game.line1)
-                    self.flashing_labels.append(game.line11)
+                    self.flashing_labels.append(self.slot_machine.line1)
+                    self.flashing_labels.append(self.slot_machine.line11)
                 if line == 1:
-                    self.flashing_labels.append(game.line2)
-                    self.flashing_labels.append(game.line22)
+                    self.flashing_labels.append(self.slot_machine.line2)
+                    self.flashing_labels.append(self.slot_machine.line22)
                 if line == 2:
-                    self.flashing_labels.append(game.line3)
-                    self.flashing_labels.append(game.line33)
+                    self.flashing_labels.append(self.slot_machine.line3)
+                    self.flashing_labels.append(self.slot_machine.line33)
                     
                 # Add multipliers for each symbol to win_multipliers list
                 match reels[0][line]:
-                    case game.a:
+                    case self.slot_machine.a:
                         win_multipliers.append(MULTIPLIERS['A'])
-                    case game.b:
+                    case self.slot_machine.b:
                         win_multipliers.append(MULTIPLIERS['B'])
-                    case game.c:
+                    case self.slot_machine.c:
                         win_multipliers.append(MULTIPLIERS['C'])
-                    case game.d:
+                    case self.slot_machine.d:
                         win_multipliers.append(MULTIPLIERS['D'])
-                    case game.e:
+                    case self.slot_machine.e:
                         win_multipliers.append(MULTIPLIERS['E'])
         
         # Pass in a list win_multipliers to update_balance function
@@ -349,8 +361,8 @@ class ControlFrame(ttk.Frame):
             
         # Check for game over and show a message
         if self.balance_var.get() == 0:
-            play_sound('sounds/game_over.wav')
-            game.msg_lbl.config(text='Game Over', background='red')
+            self.slot_machine.play_sound('sounds/game_over.wav')
+            self.slot_machine.msg_lbl.config(text='Game Over', background='red')
             answer = messagebox.askyesno('GAME OVER', 'Start a new game?')
              # If clicked on Yes start a new game, else quit the game
             if answer:
@@ -397,7 +409,7 @@ class ControlFrame(ttk.Frame):
         '''Resets balance, message, line indicators and controls, sets first_spin to 0 and plays sound'''
         self.balance_var.set(BALANCE)
         self.balance_lbl.config(text=f'Balance: ${self.balance_var.get()}')
-        game.msg_lbl.config(text='Welcome to Dino Hunt!  SPIN to start.', background='blue')
+        self.slot_machine.msg_lbl.config(text='Welcome to Dino Hunt!  SPIN to start.', background='blue')
         self.payline_var.set(1)
         self.paylines_lbl.config(text=f'Paylines: {self.payline_var.get()}')
         self.bet_var.set(1)
@@ -408,11 +420,11 @@ class ControlFrame(ttk.Frame):
             self.after_cancel(self.flash)
             self.flash = None
             self.reset_flash(self.flashing_labels)
-        lines_list = [game.line2, game.line22, game.line3, game.line33]
+        lines_list = [self.slot_machine.line2, self.slot_machine.line22, self.slot_machine.line3, self.slot_machine.line33]
         for line in lines_list:
             line.config(background='red', foreground='white', relief='sunken')
         self.first_spin = 0
-        play_sound('sounds/new_game.wav')
+        self.slot_machine.play_sound('sounds/new_game.wav')
         
     
     def clear_images(self):
@@ -431,5 +443,4 @@ class ControlFrame(ttk.Frame):
             
                  
 if __name__ == '__main__':
-    game = SlotMachine()
-    game.mainloop()
+    main()
