@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import random
+import sys
 import pygame
 
 
@@ -24,9 +25,34 @@ def main():
     '''Instantiate class SlotMachine and and start main event loop'''
     game = SlotMachine()
     game.mainloop()
+    
+    
+def play_sound(sound):
+    '''Play a sound file'''
+    pygame.mixer.init()
+    # Load sound files, error handling
+    try:
+        pygame.mixer.music.load(sound)
+        pygame.mixer.music.play()
+    except Exception as ex:
+        format_ = 'Error Occured: {0}.\nArguments: {1!r}'
+        error_message = format_.format(type(ex), f'"{sound}" file does not exist or is corrupted.')
+        messagebox.showerror('ERROR', error_message)
+        sys.exit()
+    
 
-                
-             
+def load_image(image):
+    '''Load image file and handle errors'''
+    print(image)
+    try:
+        return tk.PhotoImage(file=image)
+    except Exception as ex:
+        format_ = "Error Occured: {0}.\nArguments: {1!r}"
+        error_message = format_.format(type(ex).__name__, f'"{image}" file does not exist or is corrupted.')
+        messagebox.showerror('ERROR', error_message)
+        sys.exit()
+
+                  
 class SlotMachine(tk.Tk):
     '''A class to represent a Slot Machine'''
     def __init__(self):
@@ -37,29 +63,22 @@ class SlotMachine(tk.Tk):
         self.title('DINO HUNT')
         self.resizable(False, False)
         
-        # Play sound
-        self.play_sound('sounds/new_game.wav')
+        # Background
+        self.bg = load_image('images/background.png')
+        # Paytable
+        self.pt = load_image('images/pay_table.png')
+        # Symbols
+        self.a = load_image('images/01.png')
+        self.b = load_image('images/02.png')
+        self.c = load_image('images/03.png')
+        self.d = load_image('images/04.png')
+        self.e = load_image('images/05.png')
         
-        # Load image files with error handling
-        try:
-            # Background
-            self.bg = tk.PhotoImage(file = 'images/background.png')
-            # Paytable
-            self.pt = tk.PhotoImage(file='images/pay_table.png')
-            # Symbols
-            self.a = tk.PhotoImage(file='images/01.png')
-            self.b = tk.PhotoImage(file='images/02.png')
-            self.c = tk.PhotoImage(file='images/03.png')
-            self.d = tk.PhotoImage(file='images/04.png')
-            self.e = tk.PhotoImage(file='images/05.png')
-        except Exception as ex:
-            format_ = "Error Occured: {0}.\nArguments: {1!r}"
-            error_message = format_.format(type(ex).__name__, ex.args)
-            messagebox.showerror('ERROR', error_message)
-            return
-            
         # List of symbols
         self.symbols_list = [self.a, self.b, self.c, self.d, self.e]
+        
+        # Play sound
+        play_sound('sounds/new_game.wav')
         
         # Set background of entire window
         bg_label = ttk.Label(self, image=self.bg)
@@ -99,21 +118,6 @@ class SlotMachine(tk.Tk):
         # Instance of a ControlFrame (pass SlotMachine instance as an argument)
         control_frame = ControlFrame(self)
         control_frame.grid(row=4, column=1, columnspan=3, pady=10)
-        
-        
-    def play_sound(self, file):
-        '''Play a sound file'''
-        pygame.mixer.init()
-        # Load sound files, error handling
-        try:
-            pygame.mixer.music.load(file)
-        except Exception as ex:
-            format_ = "Error Occured: {0}.\nArguments: {1!r}"
-            error_message = format_.format(type(ex).__name__, ex.args)
-            messagebox.showerror('ERROR', error_message)
-            return
-        pygame.mixer.music.play()
-    
 
 
 class Slots:
@@ -143,7 +147,6 @@ class Slots:
         self.slot_3x3.grid(row=2, column=2)
         
         
-    
 class ControlFrame(ttk.Frame):
     '''A class to represent controls of the slot machine and its functionality'''
     def __init__(self, slot_machine):
@@ -270,7 +273,7 @@ class ControlFrame(ttk.Frame):
         # Run this part only once (if counter  == 12)
         if counter == 12:
             # Play spin sound
-            self.slot_machine.play_sound('sounds/spin.wav')
+            play_sound('sounds/spin.wav')
             # Disable controls while spinning
             self.paylines_scl.config(state='disabled')
             self.bet_scl.config(state='disabled')
@@ -327,7 +330,7 @@ class ControlFrame(ttk.Frame):
         for line in range(lines):
             if all(reels[i][line] == reels[j][line] for i, j in [(0, 1), (1, 2)]):
                 # Win sound
-                self.slot_machine.play_sound('sounds/win.wav')
+                play_sound('sounds/win.wav')
                 # Add line indicators to flashing_labels list
                 if line == 0:
                     self.flashing_labels.append(self.slot_machine.line1)
@@ -361,7 +364,7 @@ class ControlFrame(ttk.Frame):
             
         # Check for game over and show a message
         if self.balance_var.get() == 0:
-            self.slot_machine.play_sound('sounds/game_over.wav')
+            play_sound('sounds/game_over.wav')
             self.slot_machine.msg_lbl.config(text='Game Over', background='red')
             answer = messagebox.askyesno('GAME OVER', 'Start a new game?')
              # If clicked on Yes start a new game, else quit the game
@@ -424,7 +427,7 @@ class ControlFrame(ttk.Frame):
         for line in lines_list:
             line.config(background='red', foreground='white', relief='sunken')
         self.first_spin = 0
-        self.slot_machine.play_sound('sounds/new_game.wav')
+        play_sound('sounds/new_game.wav')
         
     
     def clear_images(self):
@@ -441,6 +444,6 @@ class ControlFrame(ttk.Frame):
                     
         
             
-                 
+   
 if __name__ == '__main__':
     main()
