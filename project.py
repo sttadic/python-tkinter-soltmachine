@@ -1,12 +1,12 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, simpledialog
 import random
 import sys
 import pygame
 
 
-# Starting balance
-BALANCE = 200
+# Starting balance (if set to 0, user will be prompted for balance on game start)
+BALANCE = 0
 
 # Probability for each symbol to appear (from least to most valuable)
 PROBABLILITY = [0.4, 0.3, 0.15, 0.1, 0.05]
@@ -43,7 +43,6 @@ def play_sound(sound):
 
 def load_image(image):
     '''Load image file and handle errors'''
-    print(image)
     try:
         return tk.PhotoImage(file=image)
     except Exception as ex:
@@ -51,6 +50,16 @@ def load_image(image):
         error_message = format_.format(type(ex).__name__, f'"{image}" file does not exist or is corrupted.')
         messagebox.showerror('ERROR', error_message)
         sys.exit()
+        
+
+def get_balance():
+    '''Get user's balance through dialog box'''
+    while True:
+        balance = simpledialog.askinteger('BALANCE', 'Please enter your balance (max. $500):')
+        if balance < 1 or balance > 500:
+            pass   
+        else:
+            return balance
 
                   
 class SlotMachine(tk.Tk):
@@ -58,6 +67,12 @@ class SlotMachine(tk.Tk):
     def __init__(self):
         '''Constructs all the necessary attributes for slot_machine object'''
         super().__init__()
+        
+        # Set balance
+        if BALANCE == 0:
+            self.balance = get_balance()
+        else:
+            self.balance = BALANCE
         
         # Set title and non-resizable root window
         self.title('DINO HUNT')
@@ -177,7 +192,7 @@ class ControlFrame(ttk.Frame):
 
         # Balance widget
         self.balance_var = tk.IntVar()
-        self.balance_var.set(BALANCE)
+        self.balance_var.set(self.slot_machine.balance)
         self.balance_lbl = tk.Label(self, text=f'BALANCE: ${self.balance_var.get()}', font=('', 16), fg='white', borderwidth=10, relief='groove', bg='blue', width=15)
         
         # Buttons widgets and thier appearance
@@ -410,7 +425,7 @@ class ControlFrame(ttk.Frame):
         
     def new_game(self):
         '''Resets balance, message, line indicators and controls, sets first_spin to 0 and plays sound'''
-        self.balance_var.set(BALANCE)
+        self.balance_var.set(self.slot_machine.balance)
         self.balance_lbl.config(text=f'Balance: ${self.balance_var.get()}')
         self.slot_machine.msg_lbl.config(text='Welcome to Dino Hunt!  SPIN to start.', background='blue')
         self.payline_var.set(1)
@@ -443,7 +458,6 @@ class ControlFrame(ttk.Frame):
         self.reels.slot_3x3.delete('all')
                     
         
-            
-   
+
 if __name__ == '__main__':
     main()
