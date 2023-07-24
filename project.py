@@ -22,7 +22,7 @@ MULTIPLIERS = {
 
 
 def main():
-    '''Instantiate class SlotMachine and and start main event loop'''
+    '''Instantiate class SlotMachine and start main event loop'''
     game = SlotMachine()
     game.mainloop()
     
@@ -38,7 +38,7 @@ def play_sound(sound):
         format_ = 'Error Occured: {0}.\nArguments: {1!r}'
         error_message = format_.format(type(ex), f'"{sound}" file does not exist or is corrupted.')
         messagebox.showerror('ERROR', error_message)
-        sys.exit()
+        sys.exit(ex)
     
 
 def load_image(image):
@@ -49,17 +49,18 @@ def load_image(image):
         format_ = "Error Occured: {0}.\nArguments: {1!r}"
         error_message = format_.format(type(ex).__name__, f'"{image}" file does not exist or is corrupted.')
         messagebox.showerror('ERROR', error_message)
-        sys.exit()
+        sys.exit(ex)
         
 
 def get_balance():
     '''Get user's balance through dialog box'''
     while True:
+        # Prompt user for a balance (up to $500)
         balance = simpledialog.askinteger('BALANCE', 'Please enter your balance (max. $500):')
-        if balance < 1 or balance > 500:
-            pass   
+        if balance in range(1, 501):
+            return balance  
         else:
-            return balance
+            pass
 
                   
 class SlotMachine(tk.Tk):
@@ -68,38 +69,49 @@ class SlotMachine(tk.Tk):
         '''Constructs all the necessary attributes for slot_machine object'''
         super().__init__()
         
-        # Set balance
+        # Set balance either to hardcoded amount of gloabal variable or prompt user to enter custom amount in case BALANCE is set to 0
         if BALANCE == 0:
             self.balance = get_balance()
         else:
             self.balance = BALANCE
         
-        # Set title and non-resizable root window
+        # Title of the main game window
         self.title('DINO HUNT')
+        # Set main window to be non-resizable
         self.resizable(False, False)
+        # Initialize variables that store width and height of the main game window
+        app_width = 694
+        app_height = 1010
+        # Determine size of the screen (display)
+        scr_width = self.winfo_screenwidth()
+        scr_height = self.winfo_screenheight()
+        # Center main game window against screen (display)
+        x = (scr_width/2) - (app_width/2)
+        y = (scr_height/2) - (app_height/2)
+        self.geometry(f'{app_width}x{app_height}+{round(x)}+{round(y)}')
         
-        # Background
+        # Background image
         self.bg = load_image('images/background.png')
-        # Paytable
+        # Paytable image
         self.pt = load_image('images/pay_table.png')
-        # Symbols
+        # Symbol's images
         self.a = load_image('images/01.png')
         self.b = load_image('images/02.png')
         self.c = load_image('images/03.png')
         self.d = load_image('images/04.png')
         self.e = load_image('images/05.png')
         
-        # List of symbols
+        # Store symbols in a list
         self.symbols_list = [self.a, self.b, self.c, self.d, self.e]
         
-        # Play sound
+        # Play sound on start
         play_sound('sounds/new_game.wav')
         
-        # Set background of entire window
+        # Set background of entire main game window
         bg_label = ttk.Label(self, image=self.bg)
         bg_label.place(x=0, y=0)
 
-        # Message displaying information during the game
+        # Label that will be displaying dynamic messages and info during the game
         self.msg_lbl = ttk.Label(self, text='Welcome to Dino Hunt!  SPIN to start.', font=('Arial', 18), foreground='white', background='blue', width=35, anchor='center', relief='groove', borderwidth=10)
         self.msg_lbl.grid(row=0, column=1, columnspan=3, pady=10)
         
@@ -110,6 +122,7 @@ class SlotMachine(tk.Tk):
         self.line11 = ttk.Label(self, text='Line 1', foreground='white', background='green', font=('', 18), relief='raised', borderwidth=5)
         self.line22 = ttk.Label(self, text='Line 2', foreground='white', background='red', font=('', 18), relief='sunken', borderwidth=5)
         self.line33 = ttk.Label(self, text='Line 3', foreground='white', background='red', font=('', 18), relief='sunken', borderwidth=5)
+        # Grid layout of line indicators
         self.line1.grid(row=2, column=0, padx=(10, 0))
         self.line2.grid(row=1, column=0, padx=(10, 0))
         self.line3.grid(row=3, column=0, padx=(10, 0))
@@ -117,20 +130,20 @@ class SlotMachine(tk.Tk):
         self.line22.grid(row=1, column=4, padx=(0, 10))
         self.line33.grid(row=3, column=4, padx=(0, 10))
         
-        # Slot machine's frame encompasing reels (slots)
-        self.slot_frm = ttk.Frame(self, relief='sunken', borderwidth=10, width=512, height=512)
+        # Slot machine's frame encompasing pay table on game start and reels (symbol slots) after first spin 
+        self.slot_frm = ttk.Frame(self, relief='sunken', borderwidth=10)
         self.slot_frm.grid(row=1, column=1, rowspan=3, columnspan=3, padx=10)
         
-        # Pay table label as background, containing information about the game (multiplier for specific symbol)
-        self.pt_lbl = tk.Label(self.slot_frm, image=self.pt)
-        self.pt_lbl.place(x=0, y=0, width=488, height=488)
+        # Show pay table label as background, containing information about the game (multiplier for specific symbol) on game start
+        self.pt_lbl = tk.Label(self.slot_frm, image=self.pt, width=494, height=494)
+        self.pt_lbl.pack()
         tk.Label(self.slot_frm, text=f'{MULTIPLIERS["A"]}', font=('', 22, 'bold'), borderwidth=8, relief='groove', bg='black', fg='white', width=2).place(x=355, y=80)
         tk.Label(self.slot_frm, text=f'{MULTIPLIERS["B"]}', font=('', 22, 'bold'), borderwidth=8, relief='groove', bg='black', fg='white', width=2).place(x=355, y=160)
         tk.Label(self.slot_frm, text=f'{MULTIPLIERS["C"]}', font=('', 22, 'bold'), borderwidth=8, relief='groove', bg='black', fg='white', width=2).place(x=355, y=240)
         tk.Label(self.slot_frm, text=f'{MULTIPLIERS["D"]}', font=('', 22, 'bold'), borderwidth=8, relief='groove', bg='black', fg='white', width=2).place(x=355, y=320)
         tk.Label(self.slot_frm, text=f'{MULTIPLIERS["E"]}', font=('', 22, 'bold'), borderwidth=8, relief='groove', bg='black', fg='white', width=2).place(x=355, y=400)
         
-        # Instance of a ControlFrame (pass SlotMachine instance as an argument)
+        # Instance of a ControlFrame (SlotMachine instance passed in as argument)
         control_frame = ControlFrame(self)
         control_frame.grid(row=4, column=1, columnspan=3, pady=10)
 
@@ -139,7 +152,7 @@ class Slots:
     '''A class to represent slots for a symbols'''
     def __init__(self, container):
     
-        # Create slots for symblos
+        # Create slots (containers) for symblos
         self.slot_1x1 = tk.Canvas(container, relief='groove', borderwidth=6, width=150, height=150)
         self.slot_1x2 = tk.Canvas(container, relief='groove', borderwidth=6, width=150, height=150)
         self.slot_1x3 = tk.Canvas(container, relief='groove', borderwidth=6, width=150, height=150)
@@ -170,22 +183,22 @@ class ControlFrame(ttk.Frame):
         # Store a reference to the SlotMachine instance
         self.slot_machine = slot_machine
         
-        # Configure control frame
+        # Configure control frame appearance
         self.config(relief='raised', borderwidth=10)
         
-        # Initalize IntVar to store bet value and set its default value to 1, create bet label and amount-adjust slider for bet
+        # Initalize IntVar to store bet value and set its default value to 1, create bet label and amount-adjust slider that controls bet amount
         self.bet_var = tk.IntVar()
         self.bet_var.set(1)
         self.bet_lbl = tk.Label(self, text=f'Bet: ${self.bet_var.get()}', font=('', 16), relief='ridge', borderwidth=5, bg='black', fg='white', width=8)
         self.bet_scl = tk.Scale(self, from_=1, to=10, orient='horizontal', variable=self.bet_var, bd=3, showvalue=0, troughcolor='black', bg='white', command=self.update_bet)
         
-        # Paylines and amount-adjust slider for lines
+        # Paylines and amount-adjust slider that controls which lines are being played
         self.payline_var = tk.IntVar()
         self.payline_var.set(1)
         self.paylines_lbl = tk.Label(self, text=f'Paylines: {self.payline_var.get()}', font=('', 16), relief='ridge', borderwidth=5, bg='black', fg='white', width=9)
         self.paylines_scl = tk.Scale(self, from_=1, to=3, orient='horizontal', variable=self.payline_var, bd=3, showvalue=0, troughcolor='black', bg='white', command=self.update_lines)
 
-        # Total bet label
+        # Total bet label that stores amount being bet on (paylines * bet)
         self.total_var = tk.IntVar()
         self.total_var.set(1)
         self.total_lbl = tk.Label(self, text=f'Total Bet: ${self.total_var.get()}', font=('', 16, 'bold'), justify='right', bg='black', fg='white', width=13, relief='sunken', borderwidth=6)
@@ -195,7 +208,7 @@ class ControlFrame(ttk.Frame):
         self.balance_var.set(self.slot_machine.balance)
         self.balance_lbl = tk.Label(self, text=f'BALANCE: ${self.balance_var.get()}', font=('', 16), fg='white', borderwidth=10, relief='groove', bg='blue', width=15)
         
-        # Buttons widgets and thier appearance
+        # Buttons widgets for spin and chasout, and thier appearance
         self.spin_btn = tk.Button(self, text='SPIN', font=('', 16, 'bold'), width=6, height=3, relief='raised', bd=8, bg='dark green', fg='white', activebackground='green', activeforeground='white', command=self.spin)
         self.cashout_btn = tk.Button(self, text='Cash Out', font=('', 16), relief='raised', bd=5, bg='red', activebackground='#C95858', activeforeground='white', fg='white', command=self.cashout_menu)
         
@@ -209,9 +222,8 @@ class ControlFrame(ttk.Frame):
         self.spin_btn.grid(row=4, columnspan=2)
         self.cashout_btn.grid(row=5, columnspan=2, pady=20) 
         
-        # Set variable that stores self.after which controls flashing of a line indicator labels to None
+        # Set variable that stores self.after, which controls flashing of a line indicator labels, to None
         self.flash = None
-        
         # Initialize first_spin variable and set its value to 0
         self.first_spin = 0          
                
@@ -248,7 +260,7 @@ class ControlFrame(ttk.Frame):
             total_win += self.total_var.get() * multiplier
         self.balance_var.set(self.balance_var.get() + total_win)
         self.balance_lbl.config(text=f'Balance: ${self.balance_var.get()}')
-        # Update message, if last element of list passed in is not 0, it means it's a winning spin
+        # Update message, if last element of list passed in is not 0 (means it's a winning spin)
         if multipliers[-1] != 0:
             self.slot_machine.msg_lbl.config(text=f'You won ${total_win}!')
         else:
@@ -257,10 +269,11 @@ class ControlFrame(ttk.Frame):
     
     def spin(self):
         '''Spinning functionality'''
-        
         # Check whether it is a first spin (if not skip this part)
         if self.first_spin == 0:
-            # Create an instance of the slots
+            # Remove pay table info label that shows on start - to be replaced by the reels
+            self.slot_machine.pt_lbl.destroy()
+            # Create an instance of the slots (reels)
             self.reels = Slots(self.slot_machine.slot_frm)
             # Set first_spin to 1 so there wouldn't be unnecessary instantiations of a Slots
             self.first_spin = 1
@@ -279,7 +292,7 @@ class ControlFrame(ttk.Frame):
         # Update balance (pass in -1 to substract amount of total bet from balance)
         self.update_balance([-1])
         
-        # Start spin animation
+        # Start spin animation passing in list of symbols and counter that sets how many times symblos will be randomized to simulate spinning
         self.spin_animation(self.slot_machine.symbols_list, 12)
                 
                 
@@ -311,7 +324,7 @@ class ControlFrame(ttk.Frame):
             # Clear created images and and quit sound mixer to improve performance
             self.clear_images()
             pygame.mixer.quit()
-            # Activate disabled controls and check for winnings
+            # Activate disabled controls, call spin_check() function
             self.paylines_scl.config(state='normal')
             self.bet_scl.config(state='normal')
             self.spin_btn.config(state='normal')
@@ -320,7 +333,7 @@ class ControlFrame(ttk.Frame):
             
                         
     def spin_check(self, lines):
-        '''Takes number of payline, simulates spinning of reels and check winnings'''
+        '''Takes number of paylines, simulates spinning (randomizing) of reels one more time taking probablity of each symbol into account, and checks winnings'''
         
         # Create 3 lists or randomly selected symbols using nested list comprehension
         reels = [[random.choices(self.slot_machine.symbols_list, PROBABLILITY)[0] for _ in range(3)] for _ in range(3)]
@@ -379,14 +392,17 @@ class ControlFrame(ttk.Frame):
             
         # Check for game over and show a message
         if self.balance_var.get() == 0:
+            # Play game over effect
             play_sound('sounds/game_over.wav')
+            # Configure message label to show game over message
             self.slot_machine.msg_lbl.config(text='Game Over', background='red')
+            # Prompt user to start a new game or quit
             answer = messagebox.askyesno('GAME OVER', 'Start a new game?')
              # If clicked on Yes start a new game, else quit the game
             if answer:
                 self.new_game()
             else:
-                self.quit()
+                sys.exit('Game terminated by user')
         
 
     def flash_labels(self, labels_list):
@@ -406,6 +422,7 @@ class ControlFrame(ttk.Frame):
     
     def cashout_menu(self):
         '''Opens cashout menu window'''
+        # Prompt user to confirm cashout
         answer1 = messagebox.askyesno('CASH-OUT', 'Finish the game and collect winnings?')
         # If yes (true) open another messagebox
         if answer1:                
@@ -420,20 +437,29 @@ class ControlFrame(ttk.Frame):
                     self.reset_flash(self.flashing_labels)
             # If clicked No, quit the game (close window)
             else:
-                self.quit()
+                sys.exit('Game terminated by user')
                 
         
     def new_game(self):
-        '''Resets balance, message, line indicators and controls, sets first_spin to 0 and plays sound'''
-        self.balance_var.set(self.slot_machine.balance)
-        self.balance_lbl.config(text=f'Balance: ${self.balance_var.get()}')
+        '''Resets slot machine to its inital state'''
+        # Reset or prompt user for balance and update balance label
+        if BALANCE == 0:
+            self.balance_var.set(get_balance())
+        else:
+            self.balance_var.set(self.slot_machine.balance)
+            self.balance_lbl.config(text=f'Balance: ${self.balance_var.get()}')
+        # Update label that shows dynamic messages
         self.slot_machine.msg_lbl.config(text='Welcome to Dino Hunt!  SPIN to start.', background='blue')
+        # Reset paylines and update payline's label
         self.payline_var.set(1)
         self.paylines_lbl.config(text=f'Paylines: {self.payline_var.get()}')
+        # Reset bet per line amount and update bet label
         self.bet_var.set(1)
         self.bet_lbl.config(text=f'Bet: ${self.bet_var.get()}')
+        # Reset total bet and update it's label
         self.total_var.set(1)
         self.total_lbl.config(text=f'Total Bet: ${self.total_var.get()}')
+        # Reset line indicators if some are flashing from last spin
         if self.flash:
             self.after_cancel(self.flash)
             self.flash = None
@@ -441,7 +467,9 @@ class ControlFrame(ttk.Frame):
         lines_list = [self.slot_machine.line2, self.slot_machine.line22, self.slot_machine.line3, self.slot_machine.line33]
         for line in lines_list:
             line.config(background='red', foreground='white', relief='sunken')
+        # Set first_spin back to inital value
         self.first_spin = 0
+        # Play new game effect
         play_sound('sounds/new_game.wav')
         
     
