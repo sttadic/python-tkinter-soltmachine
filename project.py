@@ -58,9 +58,13 @@ def get_balance():
         # Prompt user for a balance (up to $500)
         balance = simpledialog.askinteger('BALANCE', 'Please enter your balance (max. $500):')
         if balance in range(1, 501):
-            return balance  
+            return balance
         else:
+            # Reprompt
             pass
+        # Cancel of 'x' selected by user
+        if balance == None:
+            sys.exit('Terminated by user on balance prompt')
 
                   
 class SlotMachine(tk.Tk):
@@ -69,7 +73,7 @@ class SlotMachine(tk.Tk):
         '''Constructs all the necessary attributes for slot_machine object'''
         super().__init__()
         
-        # Set balance either to hardcoded amount of gloabal variable or prompt user to enter custom amount in case BALANCE is set to 0
+        # Set balance either to amount of gloabal constant BALANCE or prompt user to enter custom amount in case BALANCE is set to 0
         if BALANCE == 0:
             self.balance = get_balance()
         else:
@@ -447,7 +451,7 @@ class ControlFrame(ttk.Frame):
             self.balance_var.set(get_balance())
         else:
             self.balance_var.set(self.slot_machine.balance)
-            self.balance_lbl.config(text=f'Balance: ${self.balance_var.get()}')
+        self.balance_lbl.config(text=f'Balance: ${self.balance_var.get()}')
         # Update label that shows dynamic messages
         self.slot_machine.msg_lbl.config(text='Welcome to Dino Hunt!  SPIN to start.', background='blue')
         # Reset paylines and update payline's label
