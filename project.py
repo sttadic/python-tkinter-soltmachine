@@ -138,9 +138,12 @@ class SlotMachine(tk.Tk):
         self.slot_frm = ttk.Frame(self, relief='sunken', borderwidth=10)
         self.slot_frm.grid(row=1, column=1, rowspan=3, columnspan=3, padx=10)
         # Display pay-table
-        self.pay_table()
+        self.pay_table()        
         
-        
+        # Create an instance of a ControlFrame (SlotMachine instance passed in as argument)
+        control_frame = ControlFrame(self)
+        control_frame.grid(row=4, column=1, columnspan=3, pady=10)
+    
     def pay_table(self):
         '''Show pay-table label as background, containing information about the game (multiplier for specific symbol) on game start'''
         self.pt_lbl = tk.Label(self.slot_frm, image=self.pt, width=494, height=494)
@@ -150,18 +153,13 @@ class SlotMachine(tk.Tk):
         tk.Label(self.slot_frm, text=f'{MULTIPLIERS["C"]}', font=('', 22, 'bold'), borderwidth=8, relief='groove', bg='black', fg='white', width=2).place(x=355, y=240)
         tk.Label(self.slot_frm, text=f'{MULTIPLIERS["D"]}', font=('', 22, 'bold'), borderwidth=8, relief='groove', bg='black', fg='white', width=2).place(x=355, y=320)
         tk.Label(self.slot_frm, text=f'{MULTIPLIERS["E"]}', font=('', 22, 'bold'), borderwidth=8, relief='groove', bg='black', fg='white', width=2).place(x=355, y=400)
-        
-        
-        # Create an instance of a ControlFrame (SlotMachine instance passed in as argument)
-        control_frame = ControlFrame(self)
-        control_frame.grid(row=4, column=1, columnspan=3, pady=10)
 
 
 class Slots:
     '''A class to represent slots for a symbols'''
     def __init__(self, container):
     
-        # Create slots (containers) for symblos
+        # Create slots (containers) for symbols
         self.slot_1x1 = tk.Canvas(container, relief='groove', borderwidth=6, width=150, height=150)
         self.slot_1x2 = tk.Canvas(container, relief='groove', borderwidth=6, width=150, height=150)
         self.slot_1x3 = tk.Canvas(container, relief='groove', borderwidth=6, width=150, height=150)
