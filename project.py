@@ -134,11 +134,15 @@ class SlotMachine(tk.Tk):
         self.line22.grid(row=1, column=4, padx=(0, 10))
         self.line33.grid(row=3, column=4, padx=(0, 10))
         
-        # Slot machine's frame encompasing pay table on game start and reels (symbol slots) after first spin 
+        # Slot machine's frame encompasing pay-table on game start and reels (symbol slots) after first spin 
         self.slot_frm = ttk.Frame(self, relief='sunken', borderwidth=10)
         self.slot_frm.grid(row=1, column=1, rowspan=3, columnspan=3, padx=10)
+        # Display pay-table
+        self.pay_table()
         
-        # Show pay table label as background, containing information about the game (multiplier for specific symbol) on game start
+        
+    def pay_table(self):
+        '''Show pay-table label as background, containing information about the game (multiplier for specific symbol) on game start'''
         self.pt_lbl = tk.Label(self.slot_frm, image=self.pt, width=494, height=494)
         self.pt_lbl.pack()
         tk.Label(self.slot_frm, text=f'{MULTIPLIERS["A"]}', font=('', 22, 'bold'), borderwidth=8, relief='groove', bg='black', fg='white', width=2).place(x=355, y=80)
@@ -147,7 +151,8 @@ class SlotMachine(tk.Tk):
         tk.Label(self.slot_frm, text=f'{MULTIPLIERS["D"]}', font=('', 22, 'bold'), borderwidth=8, relief='groove', bg='black', fg='white', width=2).place(x=355, y=320)
         tk.Label(self.slot_frm, text=f'{MULTIPLIERS["E"]}', font=('', 22, 'bold'), borderwidth=8, relief='groove', bg='black', fg='white', width=2).place(x=355, y=400)
         
-        # Instance of a ControlFrame (SlotMachine instance passed in as argument)
+        
+        # Create an instance of a ControlFrame (SlotMachine instance passed in as argument)
         control_frame = ControlFrame(self)
         control_frame.grid(row=4, column=1, columnspan=3, pady=10)
 
@@ -264,7 +269,7 @@ class ControlFrame(ttk.Frame):
             total_win += self.total_var.get() * multiplier
         self.balance_var.set(self.balance_var.get() + total_win)
         self.balance_lbl.config(text=f'Balance: ${self.balance_var.get()}')
-        # Update message, if last element of list passed in is not 0 (means it's a winning spin)
+        # Update label that shows dynamic messages. If last element of list passed in is not 0, that means it's a winning spin
         if multipliers[-1] != 0:
             self.slot_machine.msg_lbl.config(text=f'You won ${total_win}!')
         else:
@@ -446,7 +451,7 @@ class ControlFrame(ttk.Frame):
         
     def new_game(self):
         '''Resets slot machine to its inital state'''
-        # Reset or prompt user for balance and update balance label
+        # Reset or prompt user for balance (depending on BALANCE value) and update balance label
         if BALANCE == 0:
             self.balance_var.set(get_balance())
         else:
@@ -473,6 +478,11 @@ class ControlFrame(ttk.Frame):
             line.config(background='red', foreground='white', relief='sunken')
         # Set first_spin back to inital value
         self.first_spin = 0
+        # Clear all widgets (symbol images) from slot frame
+        for widget in self.slot_machine.slot_frm.winfo_children():
+            widget.destroy()
+        # Show pay table inside of a slot frame again
+        self.slot_machine.pay_table()
         # Play new game effect
         play_sound('sounds/new_game.wav')
         
