@@ -104,15 +104,22 @@ class SlotMachine(tk.Tk):
         
         # Paytable image
         self.pt = load_image('images/pay_table.png')
-        # Symbol's images
+        # Symbol images
         self.a = load_image('images/01.png')
         self.b = load_image('images/02.png')
         self.c = load_image('images/03.png')
         self.d = load_image('images/04.png')
         self.e = load_image('images/05.png')
+        # Small symbol images for pay_table
+        small_a = load_image('images/s01.png')
+        small_b = load_image('images/s02.png')
+        small_c = load_image('images/s03.png')
+        small_d = load_image('images/s04.png')
+        small_e = load_image('images/s05.png')
         
-        # Store symbols in a list
+        # Store symbols in a lists
         self.symbols_list = [self.a, self.b, self.c, self.d, self.e]
+        self.small_symbols_list = [small_a, small_b, small_c, small_d, small_e]
         
         # Play sound on start
         play_sound('sounds/new_game.wav')
@@ -141,7 +148,7 @@ class SlotMachine(tk.Tk):
         self.slot_frm.grid(row=1, column=1, rowspan=3, columnspan=3, padx=10)
         
         # Display pay-table
-        self.pay_table()
+        self.pay_table(self.small_symbols_list)
         
         # Create an instance of a ControlFrame (SlotMachine instance passed in as argument)
         control_frame = ControlFrame(self)
@@ -151,15 +158,38 @@ class SlotMachine(tk.Tk):
         else:
             control_frame.grid(row=4, column=1, columnspan=3, pady=10)
     
-    def pay_table(self):
-        '''Show pay-table label as background on a game start, containing information about the game and multipliers as labels for specific symbol'''
-        self.pt_lbl = tk.Label(self.slot_frm, image=self.pt, width=494, height=494)
-        self.pt_lbl.pack()
-        tk.Label(self.slot_frm, text=f'{MULTIPLIERS["A"]}', font=('', 22, 'bold'), borderwidth=8, relief='groove', bg='black', fg='white', width=2).place(x=355, y=80)
-        tk.Label(self.slot_frm, text=f'{MULTIPLIERS["B"]}', font=('', 22, 'bold'), borderwidth=8, relief='groove', bg='black', fg='white', width=2).place(x=355, y=160)
-        tk.Label(self.slot_frm, text=f'{MULTIPLIERS["C"]}', font=('', 22, 'bold'), borderwidth=8, relief='groove', bg='black', fg='white', width=2).place(x=355, y=240)
-        tk.Label(self.slot_frm, text=f'{MULTIPLIERS["D"]}', font=('', 22, 'bold'), borderwidth=8, relief='groove', bg='black', fg='white', width=2).place(x=355, y=320)
-        tk.Label(self.slot_frm, text=f'{MULTIPLIERS["E"]}', font=('', 22, 'bold'), borderwidth=8, relief='groove', bg='black', fg='white', width=2).place(x=355, y=400)
+    def pay_table(self, images):
+        '''Takes list of images, creates pay_table inside of a slot_frm and widgets showing info about symbol multipliers'''
+        # Label as background image of a frame
+        pt_lbl = tk.Label(self.slot_frm, image=self.pt)
+        pt_lbl.place(x=0, y=0)
+        # Label widgets as column names
+        tk.Label(self.slot_frm, text='SYMBOLS', font=('', 22), borderwidth=3, relief='groove', bg='black', fg='white').grid(row=0, columnspan=3, pady=(9,8))
+        tk.Label(self.slot_frm, text='MULTIPLIERS', font=('', 22), borderwidth=3, relief='groove', bg='black', fg='white').grid(row=0, column=3, pady=(9,8))
+        
+        # Create list of canvases using list comprehension
+        canvases = [tk.Canvas(self.slot_frm, relief='groove', background='black', borderwidth=3, width=68, height=68) for _ in range(15)]
+        
+        # Iterate over canveses, create images for each and place them at proper position using grid layout manager
+        for i, canvas in enumerate(canvases):
+            canvas.grid(row=(i+3)//3, column=(i+3)%3, padx=7, pady=5)
+            if i < 3:
+                canvas.create_image(34, 34, image=images[0])
+            elif 3 <= i < 6:
+                canvas.create_image(34, 34, image=images[1])
+            elif 6 <= i < 9:
+                canvas.create_image(34, 34, image=images[2])
+            elif 9 <= i < 12:
+                canvas.create_image(34, 34, image=images[3])
+            else:
+                canvas.create_image(34, 34, image=images[4])
+        
+        # Label widgets displaying multipliers   
+        tk.Label(self.slot_frm, text=f'{MULTIPLIERS["A"]}', font=('', 22, 'bold'), borderwidth=4, relief='groove', bg='black', fg='white', width=2).grid(row=1, column=3, padx=88)
+        tk.Label(self.slot_frm, text=f'{MULTIPLIERS["B"]}', font=('', 22, 'bold'), borderwidth=4, relief='groove', bg='black', fg='white', width=2).grid(row=2, column=3, padx=88)
+        tk.Label(self.slot_frm, text=f'{MULTIPLIERS["C"]}', font=('', 22, 'bold'), borderwidth=4, relief='groove', bg='black', fg='white', width=2).grid(row=3, column=3, padx=88)
+        tk.Label(self.slot_frm, text=f'{MULTIPLIERS["D"]}', font=('', 22, 'bold'), borderwidth=4, relief='groove', bg='black', fg='white', width=2).grid(row=4, column=3, padx=88)
+        tk.Label(self.slot_frm, text=f'{MULTIPLIERS["E"]}', font=('', 22, 'bold'), borderwidth=4, relief='groove', bg='black', fg='white', width=2).grid(row=5, column=3, padx=88)
 
 
 class Slots:
@@ -200,19 +230,19 @@ class ControlFrame(tk.Frame):
         # Configure control frame appearance
         self.config(relief='raised', borderwidth=15, background='#929792')
         
-        # Initalize IntVar to store bet value and set its default value to 1. Ceate bet label and amount-adjust slider that controls bet amount
+        # Initalize IntVar to store bet value and set its default value to 1. Create bet label and amount-adjusting slider for bet amount
         self.bet_var = tk.IntVar()
         self.bet_var.set(1)
         self.bet_lbl = tk.Label(self, text=f'Bet: ${self.bet_var.get()}', font=('', 16), relief='ridge', borderwidth=5, bg='black', fg='white', width=8)
         self.bet_scl = tk.Scale(self, from_=1, to=10, cursor='cross', orient='horizontal', variable=self.bet_var, bd=3, showvalue=0, troughcolor='black', bg='white', command=self.update_bet)
         
-        # Paylines and amount-adjust slider that controls which lines are being played
+        # Paylines and amount-adjusting slider that controls played lines
         self.payline_var = tk.IntVar()
         self.payline_var.set(1)
         self.paylines_lbl = tk.Label(self, text=f'Paylines: {self.payline_var.get()}', font=('', 16), relief='ridge', borderwidth=5, bg='black', fg='white', width=9)
         self.paylines_scl = tk.Scale(self, from_=1, to=3, cursor='cross', orient='horizontal', variable=self.payline_var, bd=3, showvalue=0, troughcolor='black', bg='white', command=self.update_lines)
 
-        # Total bet label that stores amount being bet on (paylines * bet)
+        # Total bet label that stores bet on amount (paylines * bet)
         self.total_var = tk.IntVar()
         self.total_var.set(1)
         self.total_lbl = tk.Label(self, text=f'Total Bet: ${self.total_var.get()}', font=('', 16, 'bold'), justify='right', bg='black', fg='white', width=13, relief='sunken', borderwidth=6)
@@ -222,10 +252,10 @@ class ControlFrame(tk.Frame):
         self.balance_var.set(self.slot_machine.balance)
         self.balance_lbl = tk.Label(self, text=f'BALANCE: ${self.balance_var.get()}', font=('', 18), fg='white', borderwidth=10, relief='groove', bg='#3C6F93', width=15)
         
-        # Buttons widgets for spin, chasout and quit, thier appearance and function
+        # Button widgets for spin, chasout and quit, their appearance and function
         self.spin_btn = tk.Button(self, text='SPIN', cursor='exchange', font=('', 16, 'bold'), width=6, height=3, relief='raised', bd=8, bg='#31A819', fg='white', activebackground='green', activeforeground='white', command=self.spin)
-        self.cashout_btn = tk.Button(self, text='Cash Out', cursor='cross', font=('', 14), relief='raised', bd=5, bg='#71534B', activebackground='#C95858', activeforeground='white', fg='white', command=self.cashout_menu)
-        self.quit_btn = tk.Button(self, text='Quit', cursor='cross' ,font=('', 14), relief='raised', bd=5, bg='#71534B', activebackground='#C95858', activeforeground='white', fg='white', width=8, command=self.quit_game)
+        self.cashout_btn = tk.Button(self, text='Cash Out', cursor='cross', font=('', 14), relief='raised', bd=5, bg='#B64040', activebackground='#B12323', activeforeground='white', fg='white', command=self.cashout_menu)
+        self.quit_btn = tk.Button(self, text='Quit', cursor='cross' ,font=('', 14), relief='raised', bd=5, bg='#B64040', activebackground='#B12323', activeforeground='white', fg='white', width=8, command=self.quit_game)
         
         # Grid layout for widgets inside of a control frame
         self.bet_lbl.grid(row=0, column=0, padx=10, pady=(10, 2))
@@ -241,7 +271,7 @@ class ControlFrame(tk.Frame):
         # Initialize variable self.after, which controls flashing of a line indicator labels, and set its value to None
         self.flash = None
         # Initialize first_spin variable and set its value to 0
-        self.first_spin = 0          
+        self.first_spin = 0
                
                         
     def update_bet(self, *args):
@@ -290,8 +320,9 @@ class ControlFrame(tk.Frame):
         '''Spinning functionality'''
         # Check whether it is a first spin (if not skip this part)
         if self.first_spin == 0:
-            # Remove pay table info label that shows on start - to be replaced by the reels
-            self.slot_machine.pt_lbl.destroy()
+            # Remove pay_table widgets that show on start - to be replaced by the reels
+            for widget in self.slot_machine.slot_frm.winfo_children():
+                widget.destroy()
             # Create an instance of the slots (reels)
             self.reels = Slots(self.slot_machine.slot_frm)
             # Set first_spin to 1 so there wouldn't be unnecessary instantiations of a Slots
@@ -498,11 +529,11 @@ class ControlFrame(tk.Frame):
             line.config(background='red', foreground='white', relief='sunken')
         # Set first_spin back to inital value
         self.first_spin = 0
-        # Clear all widgets (symbol images) from slot frame
+        # Clear all widgets from slot frame
         for widget in self.slot_machine.slot_frm.winfo_children():
             widget.destroy()
         # Show pay_table inside of a slot_frame again
-        self.slot_machine.pay_table()
+        self.slot_machine.pay_table(self.slot_machine.small_symbols_list)
         # Play a new_game effect
         play_sound('sounds/new_game.wav')
         
