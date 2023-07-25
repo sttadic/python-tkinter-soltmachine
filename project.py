@@ -6,7 +6,7 @@ import pygame
 
 
 # Starting balance (if set to 0, user will be prompted for balance on game start)
-BALANCE = 200
+BALANCE = 0
 
 # Probability for each symbol to appear (from least to most valuable)
 PROBABLILITY = [0.4, 0.3, 0.15, 0.1, 0.05]
@@ -87,13 +87,17 @@ class SlotMachine(tk.Tk):
         self.overrideredirect(True)
         # Configure slot machine appearance
         self.config(borderwidth=10, relief='groove', background='black')
-        # Initialize variables that store width and height of the main game window
-        app_width = 730
-        app_height = 1050
         # Determine size of the screen (display)
         scr_width = self.winfo_screenwidth()
         scr_height = self.winfo_screenheight()
-        # Center main game window against screen (display)
+        # Initialize variables that store width and height of the main game window depending on screen resolution
+        if scr_height < 1080:
+            app_width = 1200
+            app_height = 600
+        else:
+            app_width = 730
+            app_height = 1050
+        # Place main game window at the center of the screen
         x = (scr_width/2) - (app_width/2)
         y = (scr_height/2) - (app_height/2)
         self.geometry(f'{app_width}x{app_height}+{round(x)}+{round(y)}')
@@ -141,10 +145,14 @@ class SlotMachine(tk.Tk):
         
         # Create an instance of a ControlFrame (SlotMachine instance passed in as argument)
         control_frame = ControlFrame(self)
-        control_frame.grid(row=4, column=1, columnspan=3, pady=10)
+        # Layout of control frame, if screen resolution is less than 1080p place control frame beside reels frame, otherwise place it under
+        if scr_height < 1080:
+            control_frame.grid(row=1, column=4, rowspan=3, pady=10)
+        else:
+            control_frame.grid(row=4, column=1, columnspan=3, pady=10)
     
     def pay_table(self):
-        '''Show pay-table label as background, containing information about the game (multiplier as labels for specific symbol) on game start'''
+        '''Show pay-table label as background, containing information about the game and multipliers as labels for specific symbol on a game start'''
         self.pt_lbl = tk.Label(self.slot_frm, image=self.pt, width=494, height=494)
         self.pt_lbl.pack()
         tk.Label(self.slot_frm, text=f'{MULTIPLIERS["A"]}', font=('', 22, 'bold'), borderwidth=8, relief='groove', bg='black', fg='white', width=2).place(x=355, y=80)
