@@ -110,11 +110,11 @@ class SlotMachine(tk.Tk):
         if scr_height < 1080:
             app_width = 1200
             app_height = 600
-            background = tk.Label(self, image=bg_lr).place(x=0, y=0)
+            tk.Label(self, image=bg_lr).place(x=0, y=0)
         else:
             app_width = 730
             app_height = 1050
-            background = tk.Label(self, image=bg_hr).place(x=0, y=0)
+            tk.Label(self, image=bg_hr).place(x=0, y=0)
         # Place main game window at the center of the screen
         x = (scr_width/2) - (app_width/2)
         y = (scr_height/2) - (app_height/2)
@@ -132,7 +132,7 @@ class SlotMachine(tk.Tk):
         # Refocus main window
         self.focus_force()
         
-        # Clear background label widget
+        # Clear background label widget after balance is entered and new game started
         for widget in self.winfo_children():
             widget.destroy()
         
@@ -267,7 +267,7 @@ class ControlFrame(tk.Frame):
         self.balance_var.set(self.slot_machine.balance)
         self.balance_lbl = tk.Label(self, text=f'BALANCE: ${self.balance_var.get()}', font=('', 18), fg='white', borderwidth=10, relief='groove', bg='#3C6F93', width=15)
         
-        # Button widgets for spin, chasout and quit, their appearance and function
+        # Button widgets for spin, cashout and quit, their appearance and function
         self.spin_btn = tk.Button(self, text='SPIN', cursor='exchange', font=('', 16, 'bold'), width=6, height=3, relief='raised', bd=8, bg='#31A819', fg='white', activebackground='green', activeforeground='white', command=self.spin)
         self.cashout_btn = tk.Button(self, text='Cash Out', cursor='cross', font=('', 14), relief='raised', bd=5, bg='#B64040', activebackground='#B12323', activeforeground='white', fg='white', command=self.cashout_menu)
         self.quit_btn = tk.Button(self, text='Quit', cursor='cross' ,font=('', 14), relief='raised', bd=5, bg='#B64040', activebackground='#B12323', activeforeground='white', fg='white', width=8, command=self.quit_game)
