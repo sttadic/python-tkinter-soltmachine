@@ -5,7 +5,7 @@ import sys
 import pygame
 
 
-# Starting balance (if set to 0, user will be prompted for balance on game start)
+# Starting balance - if set to 0 (default), user will be prompted for balance on game start
 BALANCE = 0
 
 # Probability for each symbol to appear (from least to most valuable)
@@ -52,11 +52,11 @@ def load_image(image):
         sys.exit(ex)
         
 
-def get_balance():
+def get_balance(master):
     '''Get user's balance through a dialog box'''
     while True:
         # Prompt user for a balance (up to $500)
-        balance = simpledialog.askinteger('BALANCE', 'Please enter your balance (max. $500):')
+        balance = simpledialog.askinteger('BALANCE', 'Please enter your balance (max. $500):', parent=master)
         if balance in range(1, 501):
             return balance
         else:
@@ -73,35 +73,9 @@ class SlotMachine(tk.Tk):
         '''Constructs all the necessary attributes for slot machine object'''
         super().__init__()
         
-        # Set balance to amount of global constant BALANCE or, in case BALANCE is set to 0, prompt user to enter custom amount
-        if BALANCE == 0:
-            self.balance = get_balance()
-        else:
-            self.balance = BALANCE
-        
-        # Title of the main game window
-        self.title('DINO HUNT')
-        # Set main window to be non-resizable
-        self.resizable(False, False)
-        # Remove the title bar of the window
-        self.overrideredirect(True)
-        # Configure slot machine appearance
-        self.config(borderwidth=10, relief='groove', background='black')
-        # Determine size of the screen (display resolution)
-        scr_width = self.winfo_screenwidth()
-        scr_height = self.winfo_screenheight()
-        # Initialize variables that store width and height of the main game window depending on screen resolution
-        if scr_height < 1080:
-            app_width = 1200
-            app_height = 600
-        else:
-            app_width = 730
-            app_height = 1050
-        # Place main game window at the center of the screen
-        x = (scr_width/2) - (app_width/2)
-        y = (scr_height/2) - (app_height/2)
-        self.geometry(f'{app_width}x{app_height}+{round(x)}+{round(y)}')
-        
+        # Background images
+        bg_hr = load_image('images/background_hr.png')
+        bg_lr = load_image('images/background_lr.png')
         # Paytable image
         self.pt = load_image('images/pay_table.png')
         # Symbol images
@@ -121,7 +95,48 @@ class SlotMachine(tk.Tk):
         self.symbols_list = [self.a, self.b, self.c, self.d, self.e]
         self.small_symbols_list = [small_a, small_b, small_c, small_d, small_e]
         
-        # Play sound on start
+        # Title of the main game window
+        self.title('DINO HUNT')
+        # Set main window to be non-resizable
+        self.resizable(False, False)
+        # Remove the title bar of the window
+        self.overrideredirect(True)
+        # Configure slot machine appearance
+        self.config(borderwidth=10, relief='groove', background='black')
+        # Determine size of the screen (display resolution)
+        scr_width = self.winfo_screenwidth()
+        scr_height = self.winfo_screenheight()
+        # Initialize variables that store width and height of the main game window and set background images depending on screen resolution
+        if scr_height < 1080:
+            app_width = 1200
+            app_height = 600
+            background = tk.Label(self, image=bg_lr).place(x=0, y=0)
+        else:
+            app_width = 730
+            app_height = 1050
+            background = tk.Label(self, image=bg_hr).place(x=0, y=0)
+        # Place main game window at the center of the screen
+        x = (scr_width/2) - (app_width/2)
+        y = (scr_height/2) - (app_height/2)
+        self.geometry(f'{app_width}x{app_height}+{round(x)}+{round(y)}')
+        
+        # Play roar effect on app start
+        play_sound('sounds/roar.wav')
+        
+        # Set balance to amount of global constant BALANCE or, in case BALANCE is set to 0, prompt user to enter custom amount
+        if BALANCE == 0:
+            self.balance = get_balance(self)
+        else:
+            self.balance = BALANCE
+            
+        # Refocus main window
+        self.focus_force()
+        
+        # Clear background label widget
+        for widget in self.winfo_children():
+            widget.destroy()
+        
+        # Play new_game sound
         play_sound('sounds/new_game.wav')
 
         # Label that will be displaying dynamic messages and info during the game
@@ -504,7 +519,7 @@ class ControlFrame(tk.Frame):
         '''Resets slot machine to its inital state'''
         # Reset or prompt user for balance (depending on BALANCE value) and update balance label
         if BALANCE == 0:
-            self.balance_var.set(get_balance())
+            self.balance_var.set(get_balance(self.slot_machine))
         else:
             self.balance_var.set(self.slot_machine.balance)
         self.balance_lbl.config(text=f'Balance: ${self.balance_var.get()}')
