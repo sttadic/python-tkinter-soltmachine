@@ -17,13 +17,13 @@ MULTIPLIERS = {"A": 2, "B": 3, "C": 5, "D": 7, "E": 10}
 
 
 def main():
-    """Instantiate SlotMachine class and start main event loop"""
+    """Instantiate SlotMachine class and start main event loop."""
     game = SlotMachine()
     game.mainloop()
 
 
 def play_sound(sound):
-    """Play a sound file"""
+    """Takes in a sound file and plays it or handle errors."""
     pygame.mixer.init()
     # Loading of sound files and error handling
     try:
@@ -39,7 +39,7 @@ def play_sound(sound):
 
 
 def load_image(image):
-    """Load image file and handle errors"""
+    """Takes in an image file, loads it or handle errors."""
     try:
         return tk.PhotoImage(file=image)
     except Exception as ex:
@@ -52,7 +52,7 @@ def load_image(image):
 
 
 def get_balance(master):
-    """Get user's balance through a dialog box"""
+    """Takes in a root window, prompts user for a balance and returns int."""
     while True:
         # Prompt user for a balance (up to $500)
         balance = simpledialog.askinteger(
@@ -69,10 +69,10 @@ def get_balance(master):
 
 
 class SlotMachine(tk.Tk):
-    """A class to represent a Slot Machine"""
+    """A class to represent a Slot Machine."""
 
     def __init__(self):
-        """Constructs all the necessary attributes for slot machine object"""
+        """Constructs all the necessary attributes for slot machine object."""
         super().__init__()
 
         # Background images
@@ -242,7 +242,7 @@ class SlotMachine(tk.Tk):
     def pay_table(self, images):
         """
         Takes list of images, creates pay_table inside of a slot_frm 
-        and widgets showing info about symbol multipliers
+        and widgets showing info about symbol multipliers.
         """
         # Label as background image of a frame
         pt_lbl = tk.Label(self.slot_frm, image=self.pt)
@@ -349,7 +349,7 @@ class SlotMachine(tk.Tk):
 
 
 class Slots:
-    """A class to represent slots for symbols"""
+    """A class to represent slots for symbols."""
 
     def __init__(self, container):
         # Create slots for symbols
@@ -439,7 +439,7 @@ class Slots:
 
 
 class ControlFrame(tk.Frame):
-    """A class to represent controls of the slot machine and its functionality"""
+    """A class to represent controls of the slot machine and its functionality."""
 
     def __init__(self, slot_machine):
         super().__init__()
@@ -595,14 +595,14 @@ class ControlFrame(tk.Frame):
         # Initialize first_spin variable and set its value to 0
         self.first_spin = 0
 
-    def update_bet(self, *args):
-        """Updates text value of bet (bet_lbl) widget based on a scale value and total"""
+    def update_bet(self):
+        """Updates text value of bet (bet_lbl) widget based on a scale value and total."""
         self.bet_lbl.config(text=f"Bet: ${self.bet_var.get()}")
         self.total_var.set(self.bet_var.get() * self.payline_var.get())
         self.total_lbl.config(text=f"Total Bet: ${self.total_var.get()}")
 
-    def update_lines(self, *args):
-        """Updates number of bet lines (paylines), total, and line indicator"""
+    def update_lines(self):
+        """Updates number of bet lines (paylines), total, and line indicator."""
         self.paylines_lbl.config(text=f"Paylines: {self.payline_var.get()}")
         self.total_var.set(self.bet_var.get() * self.payline_var.get())
         self.total_lbl.config(text=f"Total Bet: ${self.total_var.get()}")
@@ -633,7 +633,7 @@ class ControlFrame(tk.Frame):
         )
 
     def update_balance(self, multipliers):
-        """Takes in multiplier and updates balance"""
+        """Takes in a list of multipliers and updates balance."""
         # Initialze total_win variable
         total_win = 0
         for multiplier in multipliers:
@@ -650,7 +650,7 @@ class ControlFrame(tk.Frame):
             self.slot_machine.msg_lbl.config(text=f"Better luck next time.")
 
     def spin(self):
-        """Spinning functionality"""
+        """Initiates spinning and all of its components."""
         # Check whether it is a first spin (if not skip this part)
         if self.first_spin == 0:
             # Remove pay_table widgets that show on start - to be replaced by the reels
@@ -682,7 +682,7 @@ class ControlFrame(tk.Frame):
         self.spin_animation(self.slot_machine.symbols_list, self.spin_duration)
 
     def spin_animation(self, symbols, counter):
-        """Takes in symbols list and counter, simulates spinning"""
+        """Takes in list of symbols and counter, simulates spinning 'counter' number of times."""
         # Run this part only once
         if counter == self.spin_duration:
             # Play spin sound
@@ -721,7 +721,7 @@ class ControlFrame(tk.Frame):
     def spin_check(self, lines):
         """
         Takes number of paylines, simulates spinning (randomizing) of reels one more time 
-        taking probablity of each symbol into account, and checks winnings
+        taking probablity of each symbol into account, and checks winnings.
         """
 
         # Create 3 lists or randomly selected symbols using nested list comprehension
@@ -752,7 +752,7 @@ class ControlFrame(tk.Frame):
         win_multipliers = [0]
 
         # Compare symbols in appropriate positions by using all() function
-        # which returns true if all items in iterable are true
+        # which returns 'true' if all items in iterable are 'true'
         for line in range(lines):
             if all(reels[i][line] == reels[j][line] for i, j in [(0, 1), (1, 2)]):
                 # Win sound
@@ -804,8 +804,8 @@ class ControlFrame(tk.Frame):
 
     def flash_labels(self, labels_list):
         """
-        Takes labels (line indicators) from winning lines
-        and swaps background and foreground colors repeatedly using recursion
+        Takes list of labels (line indicators) from winning lines and
+        swaps background and foreground colors repeatedly using recursion.
         """
         for lbl in labels_list:
             bg = lbl.cget("background")
@@ -815,14 +815,14 @@ class ControlFrame(tk.Frame):
 
     def reset_flash(self, labels_list):
         """
-        Takes lables (line indicators) from winning (flashing) lines 
-        and sets their colors to default ones in case they end up in revert order
+        Takes list of lables (line indicators) from winning (flashing) lines 
+        and sets their colors to default ones in case they end up in revert order.
         """
         for lbl in labels_list:
             lbl.config(background="green", foreground="white")
 
     def cashout_menu(self):
-        """Opens cashout menu window"""
+        """Opens cashout menu window."""
         # Prompt user to confirm cashout
         answer1 = messagebox.askyesno(
             "CASH-OUT", "Finish the game and collect winnings?"
@@ -846,13 +846,13 @@ class ControlFrame(tk.Frame):
                 sys.exit("Terminated by user on cashout")
 
     def quit_game(self):
-        """Quit game message box"""
+        """Opens quit game message box."""
         quit = messagebox.askyesno("DINO HUNT", "Quit the game?")
         if quit:
             sys.exit("Terminated by user on quit_game prompt")
 
     def new_game(self):
-        """Resets slot machine to its inital state"""
+        """Resets slot machine to its inital state and starts an new game."""
         # Reset or prompt user for balance (depending on BALANCE value) and update balance label
         if BALANCE == 0:
             self.balance_var.set(get_balance(self.slot_machine))
@@ -896,7 +896,7 @@ class ControlFrame(tk.Frame):
         play_sound("sounds/new_game.wav")
 
     def clear_images(self):
-        """Clears created images from each slot"""
+        """Clears created images from each slot."""
         self.reels.slot_1x1.delete("all")
         self.reels.slot_1x2.delete("all")
         self.reels.slot_1x3.delete("all")
