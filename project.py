@@ -220,7 +220,7 @@ class SlotMachine(tk.Tk):
         self.line22.grid(row=1, column=4, padx=(0, 10))
         self.line33.grid(row=3, column=4, padx=(0, 10))
 
-        # Slot machine's frame encompasing pay-table on game start, 
+        # Slot machine's frame encompassing pay-table on game start, 
         # and reels (symbol slots) after initial spin
         self.slot_frm = tk.Frame(
             self, relief="raised", borderwidth=10, background="black"
@@ -283,7 +283,7 @@ class SlotMachine(tk.Tk):
         # Iterate over canveses, create images for each
         # and place them at proper position using grid layout manager
         for i, canvas in enumerate(canvases):
-            canvas.grid(row=(i + 3) // 3, column=(i + 3) % 3, padx=7, pady=5)
+            canvas.grid(row=(i + 3) // 3, column=i % 3, padx=7, pady=5)
             if i < 3:
                 canvas.create_image(34, 34, image=images[0])
             elif 3 <= i < 6:
@@ -595,13 +595,13 @@ class ControlFrame(tk.Frame):
         # Initialize first_spin variable and set its value to 0
         self.first_spin = 0
 
-    def update_bet(self):
+    def update_bet(self, *args):
         """Updates text value of bet (bet_lbl) widget based on a scale value and total."""
         self.bet_lbl.config(text=f"Bet: ${self.bet_var.get()}")
         self.total_var.set(self.bet_var.get() * self.payline_var.get())
         self.total_lbl.config(text=f"Total Bet: ${self.total_var.get()}")
 
-    def update_lines(self):
+    def update_lines(self, *args):
         """Updates number of bet lines (paylines), total, and line indicator."""
         self.paylines_lbl.config(text=f"Paylines: {self.payline_var.get()}")
         self.total_var.set(self.bet_var.get() * self.payline_var.get())
