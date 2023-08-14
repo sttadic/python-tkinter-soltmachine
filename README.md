@@ -22,6 +22,7 @@ The Slot Machine video game 'Dino Hunt' is a Python-based application that simul
 - Python (>=3.11)
 - Tkinter library (usually included with Python installations)
 - Pygame (==2.5.0)
+- Pytest (>=7.4.0) - used for testing and development purposes only
 
 ## Quick start guide
 Clone the repository:
@@ -43,6 +44,7 @@ On start of a game user is prompted for a balance. Once entered, a pay table is 
 ## Description
 
 The heart of the project lies within the "project.py" file, which serves as the main Python script responsible for implementing the entire slot machine game, encompassing its logic, design, and functionality. In addition, distinct directories house the collection of sound effects and images.
+To ensure the functionality of this project, unit tests have been provided. The test file "test_project.py" contains test cases for "get_balance", "load_image" and "play_sound" functions.
 
 The project is structured using object-oriented programming (OOP) principles, with classes representing key components of the game: SlotMachine, Slots and ControlFrame.
 
