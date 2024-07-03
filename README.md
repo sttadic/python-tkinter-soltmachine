@@ -27,7 +27,7 @@ The Slot Machine video game 'Dino Hunt' is a Python-based application that simul
 ## Quick start guide
 Clone the repository:
 ```bash
-git clone https://github.com/Stype27/Slot-Machine.git
+git clone https://github.com/sttadic/python-tkinter-soltmachine
 ```
 Install packages from a requirements file, preferably in your active virtual environment, by navigating to the project directory and typing the following command in your command prompt or terminal:
 ```bash 
